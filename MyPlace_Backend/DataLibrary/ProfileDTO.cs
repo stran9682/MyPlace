@@ -1,4 +1,4 @@
-namespace MyPlaceAPI.Data;
+namespace DataLibrary;
 
 public class ProfileDTO
 {

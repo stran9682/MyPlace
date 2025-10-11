@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using MyPlaceAPI.Data;
+using DataLibrary;
 
 namespace MyPlaceAPI.Controllers;
 
@@ -77,7 +77,7 @@ public class ProfileController : ControllerBase
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, profile.FirstName)
+            new Claim(ClaimTypes.Name, profile.Email!)
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]!));

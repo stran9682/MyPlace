@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using MyPlaceAPI.Data;
+using DataLibrary;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +14,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddEntityFrameworkNpgsql().AddDbContext<ProfileContext>(options => // connect to Postgres
     options.UseNpgsql(connectionString));
 
-builder.Services.AddIdentity<Profile, IdentityRole>(options =>  // add identity features
+builder.Services.AddIdentity<Profile, IdentityRole>(options =>  // adding identity features
     {
         options.User.RequireUniqueEmail = true;
     })
     .AddEntityFrameworkStores<ProfileContext>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // JWT validation scheme
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // JWT validation scheme and policy
     .AddJwtBearer(jwtOptions =>
     {
         jwtOptions.TokenValidationParameters = new TokenValidationParameters
