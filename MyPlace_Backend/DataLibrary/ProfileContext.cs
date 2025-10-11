@@ -11,6 +11,8 @@ public class ProfileContext : IdentityDbContext<Profile>
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        
         modelBuilder.Entity<PictureModel>()
             .HasOne<Profile>()
             .WithMany(p => p.Pictures)
