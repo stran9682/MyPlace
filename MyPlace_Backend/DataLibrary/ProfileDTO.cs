@@ -1,5 +1,9 @@
 namespace DataLibrary;
 
+/*
+ *  Sebastian Tran
+ *  Data transfer object for interacting with profiles
+ */
 public class ProfileDTO
 {
     public string? Email { get; set; }

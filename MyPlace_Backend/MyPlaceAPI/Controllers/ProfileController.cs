@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using DataLibrary;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyPlaceAPI.Controllers;
 
@@ -13,15 +14,18 @@ public class ProfileController : ControllerBase
     private readonly UserManager<Profile> _userManager;
     private readonly SignInManager<Profile> _signInManager;
     private readonly IConfiguration _configuration;
+    private readonly ProfileContext _profileContext;
     
     public ProfileController(
         UserManager<Profile> userManager, 
         SignInManager<Profile> signInManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ProfileContext profileContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
+        _profileContext = profileContext;
     }
 
     [HttpPost("register")]
@@ -77,7 +81,7 @@ public class ProfileController : ControllerBase
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, profile.Email!)
+            new Claim(ClaimTypes.Name, profile.Email!, profile.Id)
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]!));
@@ -95,5 +99,15 @@ public class ProfileController : ControllerBase
         var token = tokenHandler.WriteToken(tokenDescriptor);
         
         return token;
+    }
+
+    [HttpGet("getprofile")]
+    public async Task<ActionResult<List<Profile>>> GetProfile()
+    {
+        var profiles = await _profileContext.Users
+            .Include(profile => profile.Pictures)
+            .ToListAsync();
+        
+        return profiles;
     }
 }
