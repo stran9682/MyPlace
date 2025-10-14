@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ChaHub
+  labels:
+    app: ChaHub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ChaHub
+  template:
+    metadata:
+      name: ChaHub
+      labels:
+        app: ChaHub
+    spec:
+      containers:
+        - name: ChaHub
+          image: ???
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              protocol: TCP
+      restartPolicy: Always
+      
