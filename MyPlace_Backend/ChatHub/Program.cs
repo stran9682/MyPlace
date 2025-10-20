@@ -14,18 +14,8 @@ builder.Services.AddControllers();
 builder.Services.AddSignalR()
     .AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddEntityFrameworkNpgsql().AddDbContext<ProfileContext>(options => // connect to Postgres
-    options.UseNpgsql(connectionString));
-
-builder.Services.AddIdentity<Profile, IdentityRole>(options =>  // adding identity features
-    {
-        options.User.RequireUniqueEmail = true;
-    })
-    .AddEntityFrameworkStores<ProfileContext>();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // JWT validation scheme and policy
+// JWT validation scheme and policy
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(jwtOptions =>
     {
         jwtOptions.TokenValidationParameters = new TokenValidationParameters
@@ -56,10 +46,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // J
         };
     });
 
-//builder.Services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
+builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("frontend", options =>
+    {
+        options.WithOrigins("http://localhost:5173")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -69,6 +70,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("frontend");
 
 app.UseHttpsRedirection();
 

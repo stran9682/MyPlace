@@ -81,7 +81,7 @@ public class ProfileController : ControllerBase
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, profile.Email!, profile.Id)
+            new Claim(ClaimTypes.Name, profile.Id),
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]!));
