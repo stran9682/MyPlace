@@ -1,5 +1,8 @@
+import LandingContent from '../Components/LandingContent'
+
+
 export const Home = () => {
-    return <div>
-        Hello!
-    </div>
+    return <>
+        <LandingContent />
+  </>
 }
