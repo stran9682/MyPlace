@@ -3,6 +3,7 @@ using System;
 using DataLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataLibrary.Migrations
 {
     [DbContext(typeof(ProfileContext))]
-    partial class ProfileContextModelSnapshot : ModelSnapshot
+    [Migration("20251022025154_test3")]
+    partial class test3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -140,10 +143,6 @@ namespace DataLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("HoursAwake")
                         .HasColumnType("integer");
 
@@ -157,6 +156,9 @@ namespace DataLibrary.Migrations
                     b.Property<string>("ProfileId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Sex")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

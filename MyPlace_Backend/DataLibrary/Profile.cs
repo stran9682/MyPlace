@@ -5,14 +5,16 @@ namespace DataLibrary;
 
 public class Profile : IdentityUser
 {
-    [MaxLength(32)]
-    public string FirstName { get; set; } = String.Empty;
+    [MaxLength(32)] [Required]
+    public string FirstName { get; set; } = null!;
+
+    [MaxLength(32)] [Required] 
+    public string LastName { get; set; } = null!;
     
-    [MaxLength(32)]
-    public string LastName { get; set; } = String.Empty;
-    
-    [MaxLength(Int16.MaxValue)]
-    public string? Bio { get; set; }
-    
+    public ProfileAttributes? Attributes { get; set; }
     public ICollection<PictureModel> Pictures { get; set; } = new List<PictureModel>();
+    
+    public ICollection<Profile> MatchRequests { get; set; } = new List<Profile>();
+    
+    public ICollection<Profile> Matches { get; set; } = new List<Profile>();
 }

@@ -9,6 +9,8 @@ public class ProfileContext : IdentityDbContext<Profile>
     
     public DbSet<PictureModel> Pictures => Set<PictureModel>();
     
+    public DbSet<ProfileAttributes> ProfileAttributes => Set<ProfileAttributes>();
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -17,6 +19,13 @@ public class ProfileContext : IdentityDbContext<Profile>
             .HasOne<Profile>()
             .WithMany(p => p.Pictures)
             .HasForeignKey(s => s.ProfileId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProfileAttributes>()
+            .HasOne<Profile>()
+            .WithOne(p => p.Attributes)
+            .HasForeignKey<ProfileAttributes>(s => s.ProfileId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }

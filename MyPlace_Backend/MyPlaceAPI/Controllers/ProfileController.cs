@@ -1,10 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using DataLibrary;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace MyPlaceAPI.Controllers;
@@ -45,7 +47,7 @@ public class ProfileController : ControllerBase
             Email = profile.Email,
             FirstName = profile.FirstName,
             LastName = profile.LastName,
-            UserName = profile.UserName
+            UserName = profile.UserName,
         };
         
         var result = await _userManager.CreateAsync(newProfile, profile.Password);
@@ -75,6 +77,41 @@ public class ProfileController : ControllerBase
         if (!result.Succeeded) return Unauthorized();
 
         return GenerateJwtToken(user);
+    }
+    
+    [Authorize]
+    [HttpPost("updateprofile")] 
+    public async Task<IActionResult> UpdateProfile([FromBody] AttributeDTO attribute)
+    {
+        var id = User.FindFirstValue(ClaimTypes.Name);
+        if (id is null) return Unauthorized();
+        
+        var profile = await _userManager.FindByIdAsync(id);
+        if (profile is null) return Unauthorized();
+
+        profile.Attributes ??= new ProfileAttributes() { ProfileId = id };
+        
+        // check each non-null field of DTO
+        // https://stackoverflow.com/questions/17385472/entity-framework-only-update-values-that-are-not-null
+        var b = BindingFlags.Public | BindingFlags.Instance;
+        IEnumerable<Tuple<PropertyInfo, PropertyInfo>> propertyMap = 
+            (from f in typeof(ProfileAttributes).GetProperties(b)
+                join t in typeof(AttributeDTO).GetProperties(b) on f.Name equals t.Name
+                select Tuple.Create(f, t))
+            .ToArray();
+
+        foreach(var propertyPair in propertyMap)
+        {
+            var toValue = propertyPair.Item2.GetValue(attribute, null);
+            if (toValue != null)
+            {
+                propertyPair.Item1.SetValue(profile.Attributes, toValue, null);
+            }
+        }
+        
+        await _userManager.UpdateAsync(profile);
+
+        return Ok();
     }
 
     private string GenerateJwtToken(Profile profile)

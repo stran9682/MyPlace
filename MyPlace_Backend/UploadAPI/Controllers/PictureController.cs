@@ -21,7 +21,7 @@ public class PictureController : Controller
      *      No retrieving the entire profile first, just update
      */
     [HttpPost("add_picture")]
-    public async Task<IActionResult> AddAnotherPicture(string id, string fileName)
+    public async Task<IActionResult> AddPicture(string id, string fileName)
     {
         PictureModel model = new PictureModel()
         {
