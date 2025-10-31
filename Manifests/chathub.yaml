@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chathub
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: chathub
+  template:
+    metadata:
+      labels:
+        app: chathub
+    spec:
+      containers:
+      - name: chathub
+        image: 
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ConnectionStrings__Redis
+          value: redis:6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chathub
+spec:
+  selector:
+    app: chathub
+  ports:
+  - port: 8080
+    targetPort: 8080
