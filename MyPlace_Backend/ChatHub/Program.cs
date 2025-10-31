@@ -16,6 +16,7 @@ builder.Services.AddSignalR()
 
 // JWT validation scheme and policy
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    
     .AddJwtBearer(jwtOptions =>
     {
         jwtOptions.TokenValidationParameters = new TokenValidationParameters

@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,22 +12,24 @@ public class ProfileContext : IdentityDbContext<Profile>
     
     public DbSet<ProfileAttributes> ProfileAttributes => Set<ProfileAttributes>();
     
+    public DbSet<Group>  Groups => Set<Group>();
+    
+    public DbSet<MatchRequest> Matches => Set<MatchRequest>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         
-        modelBuilder.Entity<PictureModel>()
-            .HasOne<Profile>()
-            .WithMany(p => p.Pictures)
-            .HasForeignKey(s => s.ProfileId)
-            .IsRequired()
+        modelBuilder.Entity<MatchRequest>()
+            .HasOne(mr => mr.Sender)
+            .WithMany(profile => profile.MatchRequests)
+            .HasForeignKey(mr => mr.SenderId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<ProfileAttributes>()
-            .HasOne<Profile>()
-            .WithOne(p => p.Attributes)
-            .HasForeignKey<ProfileAttributes>(s => s.ProfileId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<MatchRequest>()
+            .HasOne(mr => mr.Receiver)
+            .WithMany()
+            .HasForeignKey(mr => mr.ReceiverId)
+            .OnDelete(DeleteBehavior.Cascade);;
     }
 }

@@ -6,6 +6,7 @@ public class ProfileAttributes
 {
     public int Id { get; set; }
 
+    // required foreign key!
     public string ProfileId { get; set; } = null!;
     
     [MaxLength(Int16.MaxValue)]
@@ -15,7 +16,4 @@ public class ProfileAttributes
     public int Personality { get; set; }
     public int HoursAwake { get; set; }
     public string Gender { get; set; } = string.Empty; 
-    
-    public ICollection<string> LikesProfiles { get; set; } = new List<string>();
-    public ICollection<string> DislikesProfiles { get; set; } = new List<string>();
 }
