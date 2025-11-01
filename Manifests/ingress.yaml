@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  labels:
+    app.kubernetes.io/name: frontend-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/websocket-services: "chathub"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: ""
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/chathub"
+        backend:
+          service:
+            name: chathub
+            port: 
+              number: 8080
+
+      - pathType: Prefix
+        path: "/Profile"
+        backend:
+          service:
+            name: api
+            port: 
+              number: 8080
+
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx
+            port:
+              number: 80

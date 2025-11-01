@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddEntityFrameworkNpgsql().AddDbContext<ProfileContext>(options => // connect to Postgres
+builder.Services.AddDbContext<ProfileContext>(options => // connect to Postgres
     options.UseNpgsql(connectionString));
 
 builder.Services.AddIdentity<Profile, IdentityRole>(options =>  // adding identity features
@@ -38,21 +38,6 @@ builder.Services.AddAuthentication(options => {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-        };
-        
-        jwtOptions.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine($"Auth failed: {context.Exception.Message}");
-                return Task.CompletedTask;
-            },
-            OnMessageReceived = context =>
-            {
-                var token = context.Request.Headers["Authorization"].ToString();
-                Console.WriteLine($"Token received: {token}");
-                return Task.CompletedTask;
-            }
         };
     });
 

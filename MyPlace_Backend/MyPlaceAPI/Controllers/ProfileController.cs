@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MyPlaceAPI.Controllers;
 
+[Route("[controller]")]
 public class ProfileController : ControllerBase
 {
     private readonly UserManager<Profile> _userManager;
@@ -86,10 +87,13 @@ public class ProfileController : ControllerBase
         var id = User.FindFirstValue(ClaimTypes.Name);
         if (id is null) return Unauthorized();
         
-        var profile = await _userManager.FindByIdAsync(id);
+        var profile = await _userManager.Users
+            .Include(profile => profile.Attributes)
+            .FirstOrDefaultAsync(identity => identity.Id == id);
+        
         if (profile is null) return Unauthorized();
 
-        profile.Attributes ??= new ProfileAttributes() { ProfileId = id };
+        profile.Attributes ??= new ProfileAttributes();
         
         // check each non-null field of DTO
         // https://stackoverflow.com/questions/17385472/entity-framework-only-update-values-that-are-not-null
@@ -141,8 +145,10 @@ public class ProfileController : ControllerBase
     [HttpGet("getprofile")]
     public async Task<ActionResult<List<Profile>>> GetProfile()
     {
-        var profiles = await _profileContext.Users
+        var profiles = await _userManager.Users
             .Include(profile => profile.Pictures)
+            .Include(profile => profile.Attributes)
+            .Include(profile => profile.MatchRequests)
             .ToListAsync();
         
         return profiles;

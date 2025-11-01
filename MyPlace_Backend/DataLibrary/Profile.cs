@@ -11,10 +11,14 @@ public class Profile : IdentityUser
     [MaxLength(32)] [Required] 
     public string LastName { get; set; } = null!;
     
+    //  I'd rather this be null
+    //  than set this with some default values
+    //  which might/may skew results?
     public ProfileAttributes? Attributes { get; set; }
+    
     public ICollection<PictureModel> Pictures { get; set; } = new List<PictureModel>();
     
-    public ICollection<Profile> MatchRequests { get; set; } = new List<Profile>();
+    public ICollection<MatchRequest> MatchRequests { get; set; } = new List<MatchRequest>();
     
-    public ICollection<Profile> Matches { get; set; } = new List<Profile>();
+    public ICollection<Group> Groups { get; set; } = new List<Group>();
 }
