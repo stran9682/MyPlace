@@ -32,4 +32,4 @@ jobs:
         with:
           context: ./MyPlace_Backend/UploadAPI
           push: true
-          tags: stran9682/uploadAPI:latest
+          tags: stran9682/uploadapi:latest
