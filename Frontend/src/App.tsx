@@ -8,6 +8,7 @@ await signalRService.StartConnection()
 function App() {
 
   return <>
+    Dude what
     <nav>
       {/*Nav goes here*/}
     </nav>
