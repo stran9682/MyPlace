@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: 
+        image: stran9682/myplace-frontend:latest
         resources:
           limits:
             memory: "512Mi"

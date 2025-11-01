@@ -9,4 +9,13 @@ public class MatchRequest
     
     public string ReceiverId { get; set; } = null!;
     public Profile Receiver { get; set; } = null!;
+    
+    public State State { get; set; }
+}
+
+public enum State
+{
+    Pending,
+    Rejected,
+    Accepted
 }

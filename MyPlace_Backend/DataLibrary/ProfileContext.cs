@@ -30,6 +30,12 @@ public class ProfileContext : IdentityDbContext<Profile>
             .HasOne(mr => mr.Receiver)
             .WithMany()
             .HasForeignKey(mr => mr.ReceiverId)
-            .OnDelete(DeleteBehavior.Cascade);;
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<MatchRequest>()
+            .Property(e => e.State)
+            .HasConversion(
+                v => v.ToString(),
+                v => Enum.Parse<State>(v, true));
     }
 }
