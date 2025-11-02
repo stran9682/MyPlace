@@ -6,9 +6,8 @@ spec:
   accessModes: 
   - ReadWriteOnce
   resources:
-  requests:
-    storage: 5Gi
-  storageClassName: standard
+    requests:
+      storage: 1Gi
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -24,32 +23,30 @@ spec:
     metadata:
       labels:
         app: postgres
-  spec:
-    containers:
-    - name: postgres
-      image: postgres:latest # You can change the version here
-      ports:
-      - containerPort: 5432
-      env:          
-      - name: POSTGRES_PASSWORD
-        value: "mypassword" # Make sure to store it securely
-      - name: POSTGRES_USER
-        value: "myuser"
-      - name: POSTGRES_DB
-        value: "profiles"
-      volumeMounts:
-      - name: postgres-data
-        mountPath: /var/lib/postgresql/data
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:latest # You can change the version here
+        ports:
+        - containerPort: 5432
+        env:          
+        - name: POSTGRES_PASSWORD
+          value: "mypassword" # Make sure to store it securely
+        - name: POSTGRES_USER
+          value: "myuser"
+        - name: POSTGRES_DB
+          value: "profiles"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
   volumeClaimTemplates:
   - metadata:
       name: postgres-data
     spec:
-      accessModes:
-      - ReadWriteOnce
-    resources:
+      accessModes: [ ReadWriteOnce ]
+      resources:
         requests:
-          storage: 5Gi
-    storageClassName: standard
+          storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
@@ -59,6 +56,6 @@ spec:
   clusterIP: None  # This makes the service headless (useful for StatefulSet)
   ports:
   - port: 5432
-  name: postgres
+    name: postgres
   selector:
     app: postgres

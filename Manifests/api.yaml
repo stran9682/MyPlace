@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myplaceapi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myplaceapi
+  template:
+    metadata:
+      labels:
+        app: myplaceapi
+    spec:
+      containers:
+      - name: myplaceapi
+        image: stran9682/myplaceapi:latest
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: connectionstring
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myplaceapi
+spec:
+  selector:
+    app: myplaceapi
+  ports:
+  - port: 8080
+    targetPort: 8080
