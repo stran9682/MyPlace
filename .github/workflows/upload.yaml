@@ -30,6 +30,7 @@ jobs:
         id: build-push-frontend
         uses: docker/build-push-action@v3
         with:
-          context: ./MyPlace_Backend/UploadAPI
+          context: ./MyPlace_Backend
+          file: ./MyPlace_Backend/UploadAPI/Dockerfile
           push: true
           tags: stran9682/uploadapi:latest

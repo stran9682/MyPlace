@@ -4,7 +4,7 @@ on:
     branches:
       - "main"
     paths:
-     - 'MyPlace_Backend/Chathub/**'
+     - 'MyPlace_Backend/ChatHub/**'
   workflow_dispatch:
 
 jobs:
@@ -30,6 +30,7 @@ jobs:
         id: build-push-frontend
         uses: docker/build-push-action@v3
         with:
-          context: ./MyPlace_Backend/Chathub
+          context: ./MyPlace_Backend
+          file: ./MyPlace_Backend/ChatHub/Dockerfile
           push: true
           tags: stran9682/chathub:latest
