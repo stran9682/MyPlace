@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatHub.Hubs;
 
-[Authorize]
+// [Authorize]
 public class ChatHub : Hub
 {
     public override async Task OnConnectedAsync()

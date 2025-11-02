@@ -26,8 +26,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: build and push frontend
-        id: build-push-frontend
+      - name: build and chathub
+        id: build-push-chathub
         uses: docker/build-push-action@v3
         with:
           context: ./MyPlace_Backend
