@@ -1,15 +1,12 @@
 import '../styles/LandingContent.css'
 import roommatesImage from '../assets/images/block1-roommates.webp'
 import type { ReactElement } from 'react'
+import { useNavigate } from 'react-router-dom';
+
 
 function LandingContent(): ReactElement {
-    const handleSignup = (): void => {
-        // Function to navigate to signup page
-    };
+    const navigate = useNavigate();
 
-    const handleLogin = (): void => {
-        // Function to navigate to login page
-    };
     return (
         <section className="block1">
             <div className="block1-content">
@@ -18,14 +15,12 @@ function LandingContent(): ReactElement {
                 <p>Let's get you one.</p>
                 
                 <div className="block1-buttons">
-                    <button className="btn-primary"
-                    onClick={handleSignup}>
+                    <button className="btn-primary" onClick={() => navigate('/signup')}>
                         Signup
-                        </button>
-                    <button className="btn-secondary"
-                    onClick={handleLogin}>
+                    </button>
+                    <button className="btn-secondary" onClick={() => navigate('/login')}>
                         Login
-                        </button>
+                    </button>
                 </div>
             </div>
 
