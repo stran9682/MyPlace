@@ -21,6 +21,34 @@ services:
       - connections
     ports:
       - "6379:6379"
+    
+  chathub:
+    build:
+      context: ./MyPlace_Backend
+      dockerfile: ChatHub/Dockerfile
+    container_name: chathub
+    depends_on:
+      - redis
+    environment:
+      - ConnectionStrings__Redis=redis:6379
+    networks:
+      - connections
+    ports:
+      - "5023:8080"
+
+  api:
+    build:
+      context: ./MyPlace_Backend
+      dockerfile: MyPlaceAPI/Dockerfile
+    container_name: api
+    depends_on:
+      - postgres
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
+    networks:
+      - connections
+    ports:
+      - "5024:8080"
 
 volumes:
   postgres_data:

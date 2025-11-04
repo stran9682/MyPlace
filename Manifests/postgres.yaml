@@ -1,13 +1,17 @@
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: Service
 metadata:
-  name: postgres-pvc
+  name: postgres
+  labels:
+    app: postgres
 spec:
-  accessModes: 
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: postgres
+  clusterIP: None
+  selector:
+    app: postgres
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -22,40 +26,30 @@ spec:
   template:
     metadata:
       labels:
-        app: postgres
+        app: postgres # has to match .spec.selector.matchLabels
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
       - name: postgres
-        image: postgres:latest # You can change the version here
+        image: postgres:18
         ports:
         - containerPort: 5432
-        env:          
-        - name: POSTGRES_PASSWORD
-          value: "mypassword" # Make sure to store it securely
-        - name: POSTGRES_USER
-          value: "myuser"
-        - name: POSTGRES_DB
-          value: "profiles"
         volumeMounts:
-        - name: postgres-data
+        - name: data
           mountPath: /var/lib/postgresql/data
+        env:
+        - name: POSTGRES_USER
+          value: myuser
+        - name: POSTGRES_PASSWORD
+          value: mypassword
+        - name: POSTGRES_DB
+          value: profiles
   volumeClaimTemplates:
   - metadata:
-      name: postgres-data
+      name: data
     spec:
-      accessModes: [ ReadWriteOnce ]
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "standard"
       resources:
         requests:
           storage: 1Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres
-spec:
-  clusterIP: None  # This makes the service headless (useful for StatefulSet)
-  ports:
-  - port: 5432
-    name: postgres
-  selector:
-    app: postgres
