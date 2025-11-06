@@ -1,24 +1,24 @@
 import { Route, Routes } from 'react-router-dom'
-import './App.css'
 import { Home } from './pages/Home'
+import { Loginpage } from './pages/Login-page'
+import { Signuppage } from './pages/Signup-page'
 
-import signalRService from "../services/SignalRService";
-await signalRService.StartConnection()
+import './App.css' 
+import type { ReactElement } from 'react'
 
-function App() {
-
-  return <>
-    <nav>
-      {/*Nav goes here*/}
-    </nav>
-
-    <main>
+function App(): ReactElement {
+  
+  return(
+    <>
+      <main>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home/>} />
+        <Route path="/login" element={<Loginpage/>} />
+        <Route path="/signup" element={<Signuppage/>} />
       </Routes>
     </main>
-
-  </>
+    </>
+  );
 }
 
 export default App

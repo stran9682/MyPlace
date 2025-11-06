@@ -1,0 +1,14 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-elasticsearch
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Retain  # Keep data even if PVC is deleted
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "2"  # Longhorn will replicate data across 3 nodes
+  staleReplicaTimeout: "2880"  # 48 hours
+  fromBackup: ""
+  fsType: "ext4"
+  dataLocality: "disabled"  # Allow scheduling on any node
