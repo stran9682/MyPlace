@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-external
+  namespace: elastic-system
+spec:
+  type: NodePort  # or LoadBalancer if you have MetalLB
+  ports:
+  - port: 9200
+    targetPort: 9200
+    name: https
+  selector:
+    elasticsearch.k8s.elastic.co/cluster-name: test-cluster
+    elasticsearch.k8s.elastic.co/node-data: "true"

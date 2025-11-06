@@ -1,0 +1,24 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-cluster
+  namespace: postgres-system
+spec:
+  instances: 3  # 3 PostgreSQL instances for HA
+  
+  # PostgreSQL version
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.2
+  
+  # Storage configuration with Longhorn
+  storage:
+    storageClass: longhorn-elasticsearch  # Reuse your existing StorageClass
+    size: 2Gi
+  
+  # Resource limits
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"

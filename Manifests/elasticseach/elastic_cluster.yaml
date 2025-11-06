@@ -1,0 +1,70 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: test-cluster
+  namespace: elastic-system
+spec:
+  version: 8.11.0
+
+  nodeSets:
+  # Master nodes - dedicated for cluster management
+  - name: master
+    count: 1
+    config:
+      node.roles: ["master"]
+      node.store.allow_mmap: false
+    
+    podTemplate:
+      spec:
+        containers:
+        - name: elasticsearch
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 500m
+            limits:
+              memory: 2Gi
+              cpu: 2
+    
+    # Longhorn persistent volume for master nodes
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi 
+        storageClassName: longhorn-elasticsearch
+  
+  # Data nodes - handle indexing and search
+  - name: data
+    count: 2
+    config:
+      node.roles: ["data", "ingest"]
+      node.store.allow_mmap: false
+    
+    podTemplate:
+      spec:
+        containers:
+        - name: elasticsearch
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 500m
+            limits:
+              memory: 2Gi
+              cpu: 2
+    
+    # Longhorn persistent volume for data nodes - larger storage
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 4Gi
+        storageClassName: longhorn-elasticsearch
