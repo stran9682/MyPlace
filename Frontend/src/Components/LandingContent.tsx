@@ -1,4 +1,4 @@
-import '../styles/LandingContent.css'
+import '../Styles/LandingContent.css'
 import roommatesImage from '../assets/images/block1-roommates.webp'
 import type { ReactElement } from 'react'
 import { useNavigate } from 'react-router-dom';

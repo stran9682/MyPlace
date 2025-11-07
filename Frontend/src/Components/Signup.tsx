@@ -1,4 +1,4 @@
-import '../styles/Signup.css'
+import '../Styles/Signup.css'
 import type { ReactElement } from 'react'
 import { Link } from 'react-router-dom'
 
