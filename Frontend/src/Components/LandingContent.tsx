@@ -3,9 +3,16 @@ import roommatesImage from '../assets/images/block1-roommates.webp'
 import type { ReactElement } from 'react'
 import { useNavigate } from 'react-router-dom';
 
+const header = import.meta.env.VITE_ANOTHER_API;
 
 function LandingContent(): ReactElement {
     const navigate = useNavigate();
+
+    fetch(header + "/getprofile")
+    .then(res => res.json())
+    .then(data => {
+        console.log(data)
+    })
 
     return (
         <section className="block1">
