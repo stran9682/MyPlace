@@ -12,6 +12,15 @@ spec:
       labels:
         app: myplaceapi
     spec:
+      initContainers:
+      - name: migration-application
+        image: stran9682/migrationapplication:latest
+        env: 
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: connectionstring
       containers:
       - name: myplaceapi
         image: stran9682/myplaceapi:latest

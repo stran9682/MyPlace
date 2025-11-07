@@ -22,3 +22,10 @@ spec:
     limits:
       memory: "2Gi"
       cpu: "1"
+
+  bootstrap:
+    initdb:
+      database: profiles
+      owner: myuser       
+      secret:
+        name: postgres-app-user

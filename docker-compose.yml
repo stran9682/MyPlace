@@ -49,6 +49,20 @@ services:
       - connections
     ports:
       - "5024:8080"
+    
+  migration:
+    build:
+      context: ./MyPlace_Backend
+      dockerfile: MigrationApplication/Dockerfile
+    container_name: migrator
+    depends_on:
+      - postgres
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
+    networks:
+      - connections
+    ports:
+      - "5025:8080"
 
 volumes:
   postgres_data:
