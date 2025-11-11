@@ -1,4 +1,4 @@
-import '../styles/Headermain.css'
+import '../Styles/Headermain.css'
 import type { ReactElement } from 'react'
 import { Link } from 'react-router-dom'
 
