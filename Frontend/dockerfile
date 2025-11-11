@@ -7,8 +7,8 @@ WORKDIR /app
 
 COPY . .
 
-ENV VITE_API_URL=/chathub
-ENV VITE_ANOTHER_API=/Profile
+ENV VITE_CHATHUB_URL=/chathub
+ENV VITE_API_URL=/Profile
 
 RUN npm install && npm run build
 

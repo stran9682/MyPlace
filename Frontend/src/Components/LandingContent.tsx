@@ -3,7 +3,7 @@ import roommatesImage from '../assets/images/block1-roommates.webp'
 import type { ReactElement } from 'react'
 import { useNavigate } from 'react-router-dom';
 
-const header = import.meta.env.VITE_ANOTHER_API;
+const header = import.meta.env.VITE_API_URL;
 
 function LandingContent(): ReactElement {
     const navigate = useNavigate();

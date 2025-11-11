@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react'
 
+const header = import.meta.env.VITE_API_URL;
 
 function Signup(): ReactElement {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ function Signup(): ReactElement {
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5182/register', {
+            const response = await fetch(header+'/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -109,7 +110,6 @@ function Signup(): ReactElement {
                         {isLoading ? 'Creating Account...' : 'Join MyPlace'}
                     </button>
                 </form>
-                {message && <p className="signup-message">{message}</p>}
                 
                 <div className="login-section">
                     Already have an account? <Link to="/login">Login</Link>

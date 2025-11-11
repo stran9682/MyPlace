@@ -16,7 +16,7 @@ class SignalRService {
         SignalRService._instance = this;
 
         try {
-            const header = import.meta.env.VITE_API_URL
+            const header = import.meta.env.VITE_CHATHUB_URL
 
             this.conn = new HubConnectionBuilder()
                 .withUrl(header
