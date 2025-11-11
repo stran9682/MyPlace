@@ -1,4 +1,4 @@
-import '../styles/Matches.css'
+import '../Styles/Matches.css'
 import profilepicture from '../assets/images/profile-picture.png'
 import petfriendly from '../assets/images/dog.png'
 import nomusic from '../assets/images/nomusic.png'
