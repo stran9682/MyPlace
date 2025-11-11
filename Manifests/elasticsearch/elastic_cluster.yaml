@@ -4,7 +4,7 @@ metadata:
   name: test-cluster
   namespace: elastic-system
 spec:
-  version: 8.11.0
+  version: 9.2.0
 
   nodeSets:
   # Master nodes - dedicated for cluster management

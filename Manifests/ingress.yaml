@@ -25,7 +25,7 @@ spec:
         path: "/Profile"
         backend:
           service:
-            name: api
+            name: myplaceapi
             port: 
               number: 8080
 
