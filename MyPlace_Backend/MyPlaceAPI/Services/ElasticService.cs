@@ -14,11 +14,22 @@ public class ElasticService
     public ElasticService(IOptions<ElasticSettings> settings)
     {
         _elasticSettings = settings.Value;
-        
-        var clientSettings = new ElasticsearchClientSettings(new Uri(_elasticSettings.Url))
-            //.CertificateFingerprint("<FINGERPRINT>")
-            //.Authentication(new BasicAuthentication(_elasticSettings.Username, _elasticSettings.Password))
-            .DefaultIndex(_elasticSettings.DefaultIndex);
+
+        ElasticsearchClientSettings clientSettings;
+            
+        if (_elasticSettings.Fingerprint != null)
+        {
+            clientSettings = new ElasticsearchClientSettings(new Uri(_elasticSettings.Url))
+                .CertificateFingerprint(_elasticSettings.Fingerprint)
+                // probably a bad idea to not check for null here!
+                .Authentication(new BasicAuthentication(_elasticSettings.Username, _elasticSettings.Password))
+                .DefaultIndex(_elasticSettings.DefaultIndex);
+        }
+        else
+        {
+            clientSettings = new ElasticsearchClientSettings(new Uri(_elasticSettings.Url))
+                .DefaultIndex(_elasticSettings.DefaultIndex);
+        }
         
         _client = new ElasticsearchClient(clientSettings);
     }

@@ -32,7 +32,7 @@ public class PictureController : Controller
         if (id is null) return Unauthorized();
         
         //  save to postgres first
-        PictureModel model = new PictureModel()
+        PictureModel model = new PictureModel
         {
             ProfileId = id,
             FileName = file.FileName

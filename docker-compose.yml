@@ -45,6 +45,8 @@ services:
       - postgres
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
+      - ElasticSettings__Url=elasticsearch:9200
+      - ElasticSettings__DefaultIndex=profile_attributes
     networks:
       - connections
     ports:
@@ -104,7 +106,24 @@ services:
     networks:
       - connections
   
-
+  upload-api:
+    container_name: upload-api
+    build:
+      context: ./MyPlace_Backend
+      dockerfile: UploadAPI/Dockerfile
+    ports:
+      - "5021:8080"
+    depends_on:
+      - minio
+      - postgres
+    environment:
+      - Minio__Endpoint=minio:9000
+      - Minio__AccessKey=ROOTNAME
+      - Minio__SecretKey=CHANGEME123
+      - Minio__BucketName=images
+    networks:
+      - connections
+  
 volumes:
   postgres_data:
   elasticsearch-data:
