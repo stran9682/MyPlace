@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using DataLibrary;
 using Microsoft.OpenApi.Models;
+using MyPlaceAPI.Configurations;
+using MyPlaceAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,9 +24,9 @@ builder.Services.AddIdentity<Profile, IdentityRole>(options =>  // adding identi
     .AddEntityFrameworkStores<ProfileContext>();
 
 builder.Services.AddAuthentication(options => {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;})  // JWT validation scheme and policy
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;})  // JWT validation scheme and policy
     
     .AddJwtBearer(jwtOptions =>
     {
@@ -50,7 +52,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Your API",
+        Title = "API",
         Version = "v1"
     });
     
@@ -61,7 +63,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer", // must be lowercase
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter your JWT token below (no need to add 'Bearer ')."
+        Description = "Enter your JWT token"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -79,6 +81,9 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services.Configure<ElasticSettings>(builder.Configuration.GetSection("ElasticSettings"));
+builder.Services.AddSingleton<ElasticService>();
 
 builder.Services.AddCors(options =>
 {

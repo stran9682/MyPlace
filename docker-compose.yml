@@ -63,9 +63,52 @@ services:
       - connections
     ports:
       - "5025:8080"
+  
+  elasticsearch:
+    container_name: els
+    image: elasticsearch:9.2.1
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    networks:
+      - connections
+    
+  kibana: 
+    container_name: kibana
+    image: kibana:9.2.1
+    ports: 
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    networks:
+      - connections
+  
+  minio:
+    container_name: minio
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ROOTNAME
+      MINIO_ROOT_PASSWORD: CHANGEME123
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - connections
+  
 
 volumes:
   postgres_data:
+  elasticsearch-data:
+  minio-data:
 
 networks:
   connections:
