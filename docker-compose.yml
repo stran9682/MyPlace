@@ -45,7 +45,7 @@ services:
       - postgres
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
-      - ElasticSettings__Url=elasticsearch:9200
+      - ElasticSettings__Url=http://elasticsearch:9200
       - ElasticSettings__DefaultIndex=profile_attributes
     networks:
       - connections
@@ -87,7 +87,7 @@ services:
     depends_on:
       - elasticsearch
     environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     networks:
       - connections
   
@@ -117,6 +117,7 @@ services:
       - minio
       - postgres
     environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
       - Minio__Endpoint=minio:9000
       - Minio__AccessKey=ROOTNAME
       - Minio__SecretKey=CHANGEME123
