@@ -1,11 +1,10 @@
 kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.10.0/deploy/longhorn.yaml
 git clone https://github.com/stran9682/MyPlace.git
-cd MyPlace/Manifests/elasticsearch
+cd MyPlace/Manifests/Elasticsearch
 kubectl create -f https://download.elastic.co/downloads/eck/3.2.0/crds.yaml
 kubectl apply -f https://download.elastic.co/downloads/eck/3.2.0/operator.yaml
-kubectl apply -f elastic_storageclass.yaml
 kubectl apply -f elastic_cluster.yaml
-kubectl apply -f elastic_service.yaml
+kubectl apply -f elastic.service.yaml
 kubectl get secret test-cluster-es-elastic-user -n elastic-system -o jsonpath="{.data.elastic}" | base64 -d
 kubectl get secret test-cluster-es-http-certs-public -n elastic-system -o jsonpath="{.data.tls\.crt}" | base64 -d > server.crt
 openssl x509 -in server.crt -noout -fingerprint -sha256
@@ -13,9 +12,6 @@ cd ../postgres
 kubectl create namespace postgres-system
 kubectl apply --server-side -f \
   https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.27/releases/cnpg-1.27.1.yaml
-kubectl apply -f postgres_secret.yaml
-kubectl apply -f postgres.yaml
-kubectl apply -f postgres_service.yaml
 cd ../api_manifests
 kubectl apply -f api_secrets.yaml
 kubectl apply -f api.yaml
