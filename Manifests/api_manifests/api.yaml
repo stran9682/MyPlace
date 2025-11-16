@@ -39,6 +39,31 @@ spec:
             secretKeyRef:
               name: postgres-secret
               key: connectionstring
+        - name: ElasticSettings__Url
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: elastic_url
+        - name: Elasticsearch__Username
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: elastic_username
+        - name: Elasticsearch__Password
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: elastic_password
+        - name: Elasticsearch__DefaultIndex
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: elastic_defaultIndex
+        - name: Elasticsearch__Fingerprint
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: elastic_fingerprint
 ---
 apiVersion: v1
 kind: Service

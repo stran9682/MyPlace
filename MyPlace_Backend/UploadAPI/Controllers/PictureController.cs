@@ -1,37 +1,76 @@
+using System.Security.Claims;
 using DataLibrary;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Minio;
+using Minio.DataModel.Args;
+using Minio.Exceptions;
+using UploadAPI.Configurations;
 
 namespace UploadAPI.Controllers;
 
 public class PictureController : Controller
 {
     private readonly ProfileContext _context;
+    private readonly IMinioClient _minioClient;
+    private readonly string _bucketName;
     
-    public PictureController(ProfileContext context)
+    public PictureController(ProfileContext context, IMinioClient minioClient, IOptions<MinioSettings> minioSettings)
     {
         _context =  context;
+        _minioClient = minioClient;
+        _bucketName = minioSettings.Value.BucketName;
     }
     
-    /*
-     *  What you ABSOLUTELY NEED TO DO!
-     *      Use the picture DbSet instead!
-     *      Postgres knows that every picture MUST be with a profile
-     *      and will match a profile with a picture always
-     *      It's really hard to be an idiot here...
-     *      No retrieving the entire profile first, just update
-     */
-    [HttpPost("add_picture")]
-    public async Task<IActionResult> AddPicture(string id, string fileName)
+    [Authorize]
+    [HttpPost("add-picture")]
+    public async Task<IActionResult> AddPicture(IFormFile file)
     {
-        PictureModel model = new PictureModel()
+        var id = User.FindFirstValue(ClaimTypes.Name);
+        if (id is null) return Unauthorized();
+        
+        //  save to postgres first
+        PictureModel model = new PictureModel
         {
             ProfileId = id,
-            FileName = fileName
+            FileName = file.FileName
         };
     
+        //  I AM COMPLETELY RELYING ON ID BEING VALID!!
         var result = await _context.Pictures.AddAsync(model);
         
         await _context.SaveChangesAsync();
+        
+        try
+        { 
+            //  Upload a file to image bucket.
+            await using var stream = file.OpenReadStream();
+            
+            var putObjectArgs = new PutObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject($"{id}/{file.FileName}")
+                .WithStreamData(stream)
+                .WithObjectSize(stream.Length)
+                .WithContentType(file.ContentType); 
+            
+            await _minioClient.PutObjectAsync(putObjectArgs);
+        }
+        catch (MinioException e)
+        {
+            Console.WriteLine("File Upload Error: {0}", e.Message);
+            return BadRequest();
+        }
+        
         return Ok();
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetUrl(string bucketId)
+    {
+        return Ok(await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
+                .WithBucket(bucketId))
+            .ConfigureAwait(false));
     }
 }

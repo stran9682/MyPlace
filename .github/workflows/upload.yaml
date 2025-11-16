@@ -1,15 +1,15 @@
-name: uploadAPI
+name: upload-API
 on:
   push:
     branches:
       - "main"
     paths:
-     - 'MyPlace_Backend/UploadAPI/**'
+      - 'MyPlace_Backend/UploadAPI/**'
   workflow_dispatch:
 
 jobs:
   push_to_registry:
-    name: build & push API image to Docker Hub
+    name: build & push Upload-API image to Docker Hub
     runs-on: ubuntu-latest
 
     steps:
@@ -26,8 +26,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: build and push upload api
-        id: build-push-uploadapi
+      - name: build and push API
+        id: build-push-api
         uses: docker/build-push-action@v3
         with:
           context: ./MyPlace_Backend

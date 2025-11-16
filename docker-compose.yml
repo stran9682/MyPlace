@@ -45,6 +45,8 @@ services:
       - postgres
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
+      - ElasticSettings__Url=http://elasticsearch:9200
+      - ElasticSettings__DefaultIndex=profile_attributes
     networks:
       - connections
     ports:
@@ -63,9 +65,70 @@ services:
       - connections
     ports:
       - "5025:8080"
-
+  
+  elasticsearch:
+    container_name: els
+    image: elasticsearch:9.2.1
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    networks:
+      - connections
+    
+  kibana: 
+    container_name: kibana
+    image: kibana:9.2.1
+    ports: 
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - connections
+  
+  minio:
+    container_name: minio
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ROOTNAME
+      MINIO_ROOT_PASSWORD: CHANGEME123
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - connections
+  
+  upload-api:
+    container_name: upload-api
+    build:
+      context: ./MyPlace_Backend
+      dockerfile: UploadAPI/Dockerfile
+    ports:
+      - "5021:8080"
+    depends_on:
+      - minio
+      - postgres
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
+      - Minio__Endpoint=minio:9000
+      - Minio__AccessKey=ROOTNAME
+      - Minio__SecretKey=CHANGEME123
+      - Minio__BucketName=images
+    networks:
+      - connections
+  
 volumes:
   postgres_data:
+  elasticsearch-data:
+  minio-data:
 
 networks:
   connections:
