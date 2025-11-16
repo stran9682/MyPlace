@@ -4,6 +4,7 @@ using MyPlaceAPI.Services;
 
 namespace MyPlaceAPI.Controllers;
 
+[ApiController]
 [Route("[controller]")]
 public class AttributeSearch : ControllerBase
 {
@@ -39,6 +40,7 @@ public class AttributeSearch : ControllerBase
     public async Task<IActionResult> GetAllUsers()
     {
         var users = await _elasticService.GetAllAttributes();
+        Console.WriteLine($"Found {users?.Count ?? 0} users");
         return users != null ? Ok(users) : NotFound();
     }
 
