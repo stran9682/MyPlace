@@ -21,6 +21,7 @@ kubectl apply -f postgres.yaml
 kubectl apply -f postgres_service.yaml
 cd ../minio
 kubectl kustomize github.com/minio/operator\?ref=v7.1.1 | kubectl apply -f -
+kubectl create namespace minio-tenant
 kubectl apply -f minio_secret.yaml
 kubectl apply -f minio.yaml
 kubectl apply -f minio_service.yaml
