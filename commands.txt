@@ -9,6 +9,9 @@ kubectl apply -f elastic_service.yaml
 kubectl get secret test-cluster-es-elastic-user -n elastic-system -o jsonpath="{.data.elastic}" | base64 -d 
 kubectl get secret test-cluster-es-http-certs-public -n elastic-system -o jsonpath="{.data.tls\.crt}" | base64 -d > server.crt
 openssl x509 -in server.crt -noout -fingerprint -sha256 | cut -d'=' -f2 | tr -d ':'
+cd ../api_manifests
+nano api_secrets
+
 cd ../postgres 
 kubectl create namespace postgres-system
 kubectl apply --server-side -f \
@@ -16,12 +19,20 @@ kubectl apply --server-side -f \
 kubectl apply -f postgres_secret.yaml
 kubectl apply -f postgres.yaml
 kubectl apply -f postgres_service.yaml
+cd ../minio
+kubectl kustomize github.com/minio/operator\?ref=v7.1.1 | kubectl apply -f -
+kubectl create namespace minio-tenant
+kubectl apply -f minio_secret.yaml
+kubectl apply -f minio.yaml
+kubectl apply -f minio_service.yaml
+kubectl apply -f external_service.yaml
 cd ../api_manifests
 kubectl apply -f api_secrets.yaml
 kubectl apply -f api.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.2/deploy/static/provider/cloud/deploy.yaml
 cd ..
 kubectl apply -f ingress.yaml
+kubectl apply -f upload-api.yaml
 kubectl apply -f redis.yaml
 kubectl apply -f chathub.yaml
 kubectl apply -f nginx.yaml

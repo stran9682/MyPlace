@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       labels:
-        name: upload-api
+        app: upload-api
     spec:
       containers:
         - name: upload-api

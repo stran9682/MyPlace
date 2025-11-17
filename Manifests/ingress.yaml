@@ -28,20 +28,12 @@ spec:
             name: myplaceapi
             port: 
               number: 8080
-              
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx
-            port:
-              number: 80
 
       - path: /images
         pathType: Prefix
         backend:
           service:
-            name:  minio-nodeport.minio-tenant
+            name: minio-cross-ns
             port:
               number: 9000
 
@@ -51,4 +43,12 @@ spec:
           service:
             name:  upload-api
             port:
-              number: 8080
+              number: 8080              
+
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx
+            port:
+              number: 80
