@@ -33,7 +33,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: minio-cross-ns
+            name: minio-nodeport
             port:
               number: 9000
 
