@@ -10,7 +10,7 @@ kubectl get secret test-cluster-es-elastic-user -n elastic-system -o jsonpath="{
 kubectl get secret test-cluster-es-http-certs-public -n elastic-system -o jsonpath="{.data.tls\.crt}" | base64 -d > server.crt
 openssl x509 -in server.crt -noout -fingerprint -sha256 | cut -d'=' -f2 | tr -d ':'
 cd ../api_manifests
-nano api_secrets
+nano api_secrets.yaml
 
 cd ../postgres 
 kubectl create namespace postgres-system

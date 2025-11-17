@@ -69,7 +69,8 @@ public class PictureController : Controller
         // return a url ;)
         return Ok(await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
                 .WithBucket(_bucketName)
-                .WithObject($"{id}/{file.FileName}"))
+                .WithObject($"{id}/{file.FileName}")
+                .WithExpiry(86400))
             .ConfigureAwait(false));
     }
     
