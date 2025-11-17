@@ -1,0 +1,51 @@
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: minio
+  namespace: minio-tenant
+  labels:
+    app: minio
+spec:
+  image: quay.io/minio/minio:RELEASE.2025-04-08T15-41-24Z
+
+  requestAutoCert: false
+
+  configuration:
+    name: minio-secret
+
+  pools:
+    - servers: 4
+      name: pool-0
+      volumesPerServer: 2
+      volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 4Gi
+          storageClassName: longhorn-elasticsearch
+      containerSecurityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
+
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+        limits:
+          cpu: "1"
+          memory: "2Gi"
+
+      exposeServices:
+        console: false
+        minio: false

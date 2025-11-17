@@ -8,27 +8,28 @@ using Microsoft.IdentityModel.Tokens;
 using DataLibrary;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using MyPlaceAPI.Services;
 
 namespace MyPlaceAPI.Controllers;
 
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class ProfileController : ControllerBase
 {
     private readonly UserManager<Profile> _userManager;
     private readonly SignInManager<Profile> _signInManager;
     private readonly IConfiguration _configuration;
-    private readonly ProfileContext _profileContext;
+    private readonly ElasticService  _elasticService;
     
     public ProfileController(
         UserManager<Profile> userManager, 
         SignInManager<Profile> signInManager,
         IConfiguration configuration,
-        ProfileContext profileContext)
+        ElasticService  elasticService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
-        _profileContext = profileContext;
+        _elasticService = elasticService;
     }
 
     [HttpPost("register")]
@@ -82,7 +83,7 @@ public class ProfileController : ControllerBase
     
     [Authorize]
     [HttpPost("updateprofile")] 
-    public async Task<IActionResult> UpdateProfile([FromBody] AttributeDTO attribute)
+    public async Task<ActionResult<Attribute>> UpdateProfile([FromBody] AttributeDTO attribute)
     {
         var id = User.FindFirstValue(ClaimTypes.Name);
         if (id is null) return Unauthorized();
@@ -115,7 +116,10 @@ public class ProfileController : ControllerBase
         
         await _userManager.UpdateAsync(profile);
 
-        return Ok();
+        // pass this into elastic search. Everything should be filled in too ;)
+        await  _elasticService.AddOrUpdate(profile.Attributes);
+        
+        return Ok(profile.Attributes);
     }
 
     private string GenerateJwtToken(Profile profile)

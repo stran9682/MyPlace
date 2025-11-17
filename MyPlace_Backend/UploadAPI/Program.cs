@@ -26,6 +26,7 @@ builder.Services.AddMinio(configureClient => configureClient
 
 builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
 
+// check if images bucket is real.
 builder.Services.AddHostedService<BucketInitalizerService>();
 
 builder.Services.AddAuthentication(options => {
@@ -103,11 +104,8 @@ var app = builder.Build();
 app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

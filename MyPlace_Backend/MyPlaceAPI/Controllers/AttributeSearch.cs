@@ -5,7 +5,7 @@ using MyPlaceAPI.Services;
 namespace MyPlaceAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class AttributeSearch : ControllerBase
 {
     private readonly ElasticService _elasticService;

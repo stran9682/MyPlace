@@ -7,7 +7,7 @@ allowVolumeExpansion: true
 reclaimPolicy: Retain  # Keep data even if PVC is deleted
 volumeBindingMode: Immediate
 parameters:
-  numberOfReplicas: "2"  # Longhorn will replicate data across 3 nodes
+  numberOfReplicas: "2"  # Longhorn will replicate data across 2 nodes
   staleReplicaTimeout: "2880"  # 48 hours
   fromBackup: ""
   fsType: "ext4"

@@ -4,18 +4,17 @@ import type { ReactElement } from 'react'
 import { useNavigate } from 'react-router-dom';
 
 const header = import.meta.env.VITE_API_URL;
-const searchHeader = import.meta.env.VITE_SEARCH_URL;
 
 function LandingContent(): ReactElement {
     const navigate = useNavigate();
 
-    fetch(header + "/getprofile")
+    fetch(header + "/Profile/getprofile")
     .then(res => res.json())
     .then(data => {
         console.log(data)
     })
 
-    fetch(searchHeader + "/get-all-users")
+    fetch(header + "/AttributeSearch/get-all-users")
     .then(res => res.json())
     .then(data => {
         console.log(data)

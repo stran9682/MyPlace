@@ -11,6 +11,8 @@ using UploadAPI.Configurations;
 
 namespace UploadAPI.Controllers;
 
+[ApiController]
+[Route("[controller]")]
 public class PictureController : Controller
 {
     private readonly ProfileContext _context;
@@ -39,9 +41,8 @@ public class PictureController : Controller
         };
     
         //  I AM COMPLETELY RELYING ON ID BEING VALID!!
+        //  Postgres enforces that every attribute must have a valid profile
         var result = await _context.Pictures.AddAsync(model);
-        
-        await _context.SaveChangesAsync();
         
         try
         { 
@@ -56,6 +57,8 @@ public class PictureController : Controller
                 .WithContentType(file.ContentType); 
             
             await _minioClient.PutObjectAsync(putObjectArgs);
+            
+            await _context.SaveChangesAsync(); // only save to postgres if minio works
         }
         catch (MinioException e)
         {
@@ -63,14 +66,20 @@ public class PictureController : Controller
             return BadRequest();
         }
         
-        return Ok();
+        // return a url ;)
+        return Ok(await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject($"{id}/{file.FileName}"))
+            .ConfigureAwait(false));
     }
     
-    [HttpGet]
-    public async Task<IActionResult> GetUrl(string bucketId)
+    [HttpGet("get-url")]
+    public async Task<IActionResult> GetUrl(string id, string filename)
     {
         return Ok(await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
-                .WithBucket(bucketId))
+                .WithBucket(_bucketName)
+                .WithObject($"{id}/{filename}")
+                .WithExpiry(86400))
             .ConfigureAwait(false));
     }
 }

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-nodeport
+  namespace: minio-tenant
+spec:
+  type: ExternalName
+  ExternalName: minio-nodeport.minio-tenant.svc.cluster.local
+  ports:
+    - name: http-minio
+      port: 9000
+      targetPort: 9000
+  selector:
+    v1.min.io/tenant: minio-tenant
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: console-nodeport
+  namespace: minio
+spec:
+  ports:
+    - name: http-console
+      port: 9090
+      targetPort: 9090
+  selector:
+    v1.min.io/tenant: minio
+  type: NodePort

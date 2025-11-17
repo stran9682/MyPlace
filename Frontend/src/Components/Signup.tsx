@@ -33,7 +33,7 @@ function Signup(): ReactElement {
         setIsLoading(true);
 
         try {
-            const response = await fetch(header+'/register', {
+            const response = await fetch(header+'/Profile/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
