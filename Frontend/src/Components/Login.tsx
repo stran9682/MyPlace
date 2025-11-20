@@ -3,6 +3,8 @@ import type { ReactElement } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react'
+import Cookies from 'js-cookie';
+
 
 const header = import.meta.env.VITE_API_URL;
 
@@ -41,7 +43,11 @@ function Login(): ReactElement {
 
             if (response.ok) {
                 const token = await response.text();
-                localStorage.setItem('token', token);
+                Cookies.set('token', token, {
+                    expires: 1/48,
+                    sameSite: 'strict',
+                    secure: true
+                    });
                 navigate('/matches');
             } else {
                 setError('There was a problem logging in. Please try again.');
