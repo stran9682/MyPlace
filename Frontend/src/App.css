@@ -1,5 +1,6 @@
 body {
-  background-image: url("./assets/images/mesh-gradient2.jpg");
+  background-image: url("./assets/images/mesh-gradient4.png");
+  box-shadow: inset 0 0 0 50vw rgba(255, 255, 255, 0.2);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;

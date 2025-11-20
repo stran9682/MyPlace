@@ -8,9 +8,9 @@ function Header(): ReactElement {
         <header className="header">
             <div className="logo">MyPlace</div>
             <nav className="nav">
-                <Link to="/login">LOGIN</Link>
-                <Link to="/signup">SIGNUP</Link>
-                <Link to="/about">ABOUT</Link>
+                <div className='login-btn-container'>
+                    <Link to="/login">Log in</Link>
+                </div>
             </nav>
         </header>
     );

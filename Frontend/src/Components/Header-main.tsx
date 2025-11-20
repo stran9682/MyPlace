@@ -9,13 +9,13 @@ function Headermain(): ReactElement {
             <div className="logo">MyPlace</div>
             <nav className="settings">
                 <div className="matches-navbtn">
-                    <Link to="/matches">MATCHES</Link>
+                    <Link to="/matches">Matches</Link>
                 </div>
                 <div>
-                    <Link to="/login">MESSAGES</Link>
+                    <Link to="/login">Messages</Link>
                 </div>
                 <div>
-                    <Link to="/signup">PROFILE</Link>
+                    <Link to="/signup">Profile</Link>
                 </div>
             </nav>
         </header>

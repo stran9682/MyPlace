@@ -22,25 +22,17 @@ function LandingContent(): ReactElement {
 
 
     return (
-        <section className="block1">
-            <div className="block1-content">
-                <h1>Need a new</h1>
-                <h1>roommate?</h1>
-                <p>Let's get you one.</p>
+        <section className="landing-container">
+                <div className="landing-text">
+                    <p>Need help finding a roommate?</p>
+                    <h1>Let's get you one.</h1>
+                </div>
                 
                 <div className="block1-buttons">
-                    <button className="btn-primary" onClick={() => navigate('/signup')}>
-                        Signup
-                    </button>
-                    <button className="btn-secondary" onClick={() => navigate('/login')}>
-                        Login
+                    <button className="signup-btn" onClick={() => navigate('/signup')}>
+                        Create account
                     </button>
                 </div>
-            </div>
-
-            <div className="block1-image">
-                <img src={roommatesImage} alt="Roommates" />
-            </div>
         </section>
     );
 }
