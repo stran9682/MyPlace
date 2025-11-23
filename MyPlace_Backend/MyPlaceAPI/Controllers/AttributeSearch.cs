@@ -1,4 +1,3 @@
-using DataLibrary;
 using Microsoft.AspNetCore.Mvc;
 using MyPlaceAPI.Services;
 
@@ -15,20 +14,6 @@ public class AttributeSearch : ControllerBase
         _elasticService = elasticService;
     }
     
-    [HttpPost("create-index")]
-    public async Task<IActionResult> CreateIndex(string indexName)
-    {
-        await _elasticService.CreateIndex(indexName);
-        return Ok();
-    }
-
-    [HttpPost("add-user")]
-    public async Task<IActionResult> AddProfileAttributes([FromBody] ProfileAttributes profileAttributes)
-    {
-        var result = await  _elasticService.AddOrUpdate(profileAttributes);
-        return result ? Ok() : BadRequest();
-    }
-
     [HttpGet("get-user")]
     public async Task<IActionResult> GetProfileAttributes(string key)
     {

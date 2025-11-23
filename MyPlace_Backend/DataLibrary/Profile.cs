@@ -18,7 +18,8 @@ public class Profile : IdentityUser
     
     public ICollection<PictureModel> Pictures { get; set; } = new List<PictureModel>();
     
-    public ICollection<MatchRequest> MatchRequests { get; set; } = new List<MatchRequest>();
+    public ICollection<MatchRequest> OutgoingMatchRequests { get; set; } = new List<MatchRequest>();
+    public ICollection<MatchRequest> IncomingMatchRequests { get; set; } = new List<MatchRequest>();
     
     public ICollection<Group> Groups { get; set; } = new List<Group>();
 }

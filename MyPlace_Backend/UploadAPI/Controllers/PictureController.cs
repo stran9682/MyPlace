@@ -11,6 +11,8 @@ using UploadAPI.Configurations;
 
 namespace UploadAPI.Controllers;
 
+// Picture controller 
+//  For handling file uploads to minio
 [ApiController]
 [Route("[controller]")]
 public class PictureController : Controller
@@ -67,20 +69,6 @@ public class PictureController : Controller
         }
         
         // return a url ;)
-        return Ok(await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
-                .WithBucket(_bucketName)
-                .WithObject($"{id}/{file.FileName}")
-                .WithExpiry(86400))
-            .ConfigureAwait(false));
-    }
-    
-    [HttpGet("get-url")]
-    public async Task<IActionResult> GetUrl(string id, string filename)
-    {
-        return Ok(await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
-                .WithBucket(_bucketName)
-                .WithObject($"{id}/{filename}")
-                .WithExpiry(86400))
-            .ConfigureAwait(false));
+        return Ok($"{_bucketName}/{id}/{file.FileName}");
     }
 }

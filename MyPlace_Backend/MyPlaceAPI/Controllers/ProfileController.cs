@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
@@ -12,6 +13,10 @@ using MyPlaceAPI.Services;
 
 namespace MyPlaceAPI.Controllers;
 
+// Profile Controller
+//  For handling user data
+//  i.e. logging in, registering, getting recommendations
+[ApiController]
 [Route("api/[controller]")]
 public class ProfileController : ControllerBase
 {
@@ -19,17 +24,20 @@ public class ProfileController : ControllerBase
     private readonly SignInManager<Profile> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly ElasticService  _elasticService;
+    private readonly ProfileContext _profileContext;
     
     public ProfileController(
         UserManager<Profile> userManager, 
         SignInManager<Profile> signInManager,
         IConfiguration configuration,
-        ElasticService  elasticService)
+        ElasticService  elasticService,
+        ProfileContext profileContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
         _elasticService = elasticService;
+        _profileContext = profileContext;
     }
 
     [HttpPost("register")]
@@ -83,7 +91,7 @@ public class ProfileController : ControllerBase
     
     [Authorize]
     [HttpPost("updateprofile")] 
-    public async Task<ActionResult<Attribute>> UpdateProfile([FromBody] AttributeDTO attribute)
+    public async Task<ActionResult<ProfileAttributes>> UpdateProfile([FromBody] AttributeDTO attribute)
     {
         var id = User.FindFirstValue(ClaimTypes.Name);
         if (id is null) return Unauthorized();
@@ -114,12 +122,13 @@ public class ProfileController : ControllerBase
             }
         }
         
-        await _userManager.UpdateAsync(profile);
+        var updatePostgres = await _userManager.UpdateAsync(profile);
+        if (!updatePostgres.Succeeded) return BadRequest("Postgres Failure");
 
-        // pass this into elastic search. Everything should be filled in too ;)
-        await  _elasticService.AddOrUpdate(profile.Attributes);
-        
-        return Ok(profile.Attributes);
+        // pass this into elastic search too. Everything should be filled in too ;)
+        var result = await _elasticService.AddOrUpdate(profile.Attributes);
+
+        return result ? profile.Attributes : BadRequest("Elasticsearch failure");
     }
 
     private string GenerateJwtToken(Profile profile)
@@ -146,15 +155,147 @@ public class ProfileController : ControllerBase
         return token;
     }
 
+    // Gets ALL the profiles. Very much only for debugging.
     [HttpGet("getprofile")]
     public async Task<ActionResult<List<Profile>>> GetProfile()
     {
         var profiles = await _userManager.Users
             .Include(profile => profile.Pictures)
             .Include(profile => profile.Attributes)
-            .Include(profile => profile.MatchRequests)
+            .Include(profile => profile.IncomingMatchRequests)
+            .Include(profile => profile.OutgoingMatchRequests)
             .ToListAsync();
         
         return profiles;
     }
+    
+    // Retrieves recommendations by calling elasticsearch for similar profiles
+    // Then retrieves profile ids from postgres if they are either pending or a suggestion
+    // Will NOT tell you which ones are which to avoid stale data.
+    [Authorize]
+    [HttpGet("get-recommendations")]
+    public async Task<ActionResult<List<string>>> GetRecommendations()
+    {
+        var id = User.FindFirstValue(ClaimTypes.Name);
+        if (id is null) return Unauthorized();
+
+        // Get yo profile
+        Profile? userProfile = await _userManager.Users
+            .Include(profile => profile.Attributes)        // need this for the elastic search query
+            .Include(profile => profile.OutgoingMatchRequests)
+            .Include(profile => profile.IncomingMatchRequests
+                .Where(request => request.State == State.Pending))
+            .FirstOrDefaultAsync(identity => identity.Id == id);
+        
+        if (userProfile?.Attributes == null) return BadRequest();
+        
+        // Get some recommendations
+        List<string>? elasticSearchQuery = await _elasticService.GetSimilarAttributes(userProfile.Attributes); 
+        if  (elasticSearchQuery is null) return BadRequest();
+        
+        HashSet<string> recommendationsIds = elasticSearchQuery.ToHashSet(); // You'll get out of order recommendations,
+                                                                             // but damn it's fast!!
+                                                                             // Converting list to hashset is faster 
+                                                                             // than just creating a hashset also
+                                                                             
+        // remove people you've sent a request to already
+        recommendationsIds.ExceptWith(userProfile.OutgoingMatchRequests.Select(x => x.ReceiverId));
+        
+        // Get Ids of pending requesters
+        var pendingRequests = userProfile.IncomingMatchRequests
+            .Select(request => request.SenderId);
+        
+        // add pending requests to recommendations
+        recommendationsIds.UnionWith(pendingRequests);
+
+        // Query postgres for profiles, return Ids.
+        return await _userManager.Users
+            .Where(user => recommendationsIds.Contains(user.Id))
+            .Select(user => user.Id)
+            .ToListAsync();
+        
+    }
+    
+    // retrieves the public information of a profile,
+    // and it's status (either pending or suggestion)
+    [Authorize]
+    [HttpGet("get-public-profile")]
+    public async Task<ActionResult<ProfileOutDTO>> GetProfileById(string userId)
+    {
+        var personalId = User.FindFirstValue(ClaimTypes.Name);
+        if (personalId is null) return Unauthorized();
+        
+        Profile? profile = await _userManager.Users
+            .Include(profile => profile.Attributes) 
+            .Include(profile => profile.Pictures)
+            .Include(profile => profile.OutgoingMatchRequests
+                .Where(mr => mr.ReceiverId == personalId && mr.State == State.Pending))
+            .Include(profile => profile.Groups)
+            .FirstOrDefaultAsync(identity => identity.Id == userId);
+        
+        if (profile is null) return NotFound();
+
+        ProfileOutDTO profileOutDto = new()
+        {
+            Id = profile.Id,
+            UserName = profile.UserName ?? string.Empty,
+            FirstName = profile.FirstName,
+            LastName = profile.LastName,
+            Bio = profile.Attributes?.Bio ?? string.Empty,
+
+            Pictures = profile.Pictures,
+            SuggestionType = profile.OutgoingMatchRequests.Count == 0 
+                ? SuggestionType.Suggestion : SuggestionType.Pending
+        };
+        
+        return profileOutDto;
+    }
+    
+    [Authorize]
+    [HttpPost("send-request")]
+    public async Task<IActionResult> SendRequest(string receiverId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Name);
+        if (userId is null) return Unauthorized();
+
+        // request to you already exists
+        var matchRequest = await _profileContext.Matches
+            .Include(request => request.Receiver)   
+            .Include(request => request.Sender)         // Yes, I am retrieving the entire thing. 
+            .FirstOrDefaultAsync(request => request.ReceiverId == userId && request.SenderId == receiverId);
+        
+        if (matchRequest is not null && matchRequest.State != State.Pending)
+            return Ok("no request sent, outgoing request no longer pending");
+        
+        // You're accepting a request here
+        if (matchRequest is not null)
+        {
+            _profileContext.Groups.Add(new Group()
+            {
+                GroupName = $"{matchRequest.Receiver.UserName}-{matchRequest.Sender.UserName}",
+                Profiles = {matchRequest.Sender,  matchRequest.Receiver}    // BUT HE SCORES!!!
+            });
+            
+            matchRequest.State = State.Accepted;
+        }
+        // You're sending a request here
+        else
+        {
+            MatchRequest request = new()
+            {
+                ReceiverId = receiverId,
+                SenderId = userId,
+                State = State.Pending
+            };
+
+            await _profileContext.Matches.AddAsync(request);    // should fail if you've sent a request already!!!
+                                                                // which is what we want lol!!! but not the correct way
+                                                                // to handle this, I.E very bad practice. 
+        }
+        
+        await _profileContext.SaveChangesAsync();
+        
+        return Ok();
+    }
+    
 }
