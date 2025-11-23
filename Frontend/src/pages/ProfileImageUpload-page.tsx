@@ -3,9 +3,9 @@ import ProfileImageUpload from '../Components/ProfileImageUpload'
 
 export const Profilepage = () => {
     return (
-        <div className="profile-page">
+        <>
             <Headermain />
             <ProfileImageUpload />
-        </div>
+       </>
     )
 }

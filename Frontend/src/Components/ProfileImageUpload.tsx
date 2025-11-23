@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Upload, X, User } from 'lucide-react';
+import Cookies from 'js-cookie';
+import '../Styles/ProfileImageUpload.css';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -62,7 +64,7 @@ export default function ProfileImageUpload() {
     formData.append('file', image);
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = Cookies.get('token');
       
       const response = await fetch(`${apiUrl}/Picture/add-picture`, {
         method: 'POST',
@@ -88,32 +90,32 @@ export default function ProfileImageUpload() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white bg-opacity-60 rounded-3xl shadow-2xl p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+    <div className="upload-page">
+      <div className="upload-card">
+        <h2 className="upload-title">
           Upload Profile Image
         </h2>
 
-        <div className="space-y-6">
+        <div className="upload-content">
           {/* Preview Area */}
-          <div className="flex justify-center">
+          <div className="preview-container">
             {preview ? (
-              <div className="relative">
+              <div className="preview-wrapper">
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-40 h-40 rounded-full object-cover border-4 border-indigo-200"
+                  className="preview-image"
                 />
                 <button
                   onClick={handleRemove}
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg"
+                  className="remove-button"
                 >
                   <X size={16} />
                 </button>
               </div>
             ) : (
-              <div className="w-40 h-40 rounded-full bg-gray-100 flex items-center justify-center border-4 border-gray-200">
-                <User size={64} className="text-gray-400" />
+              <div className="preview-placeholder">
+                <User size={64} className="placeholder-icon" />
               </div>
             )}
           </div>
@@ -123,46 +125,40 @@ export default function ProfileImageUpload() {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              isDragging
-                ? 'border-indigo-500 bg-indigo-50'
-                : 'border-gray-300 hover:border-indigo-400'
-            }`}
+            className={`upload-zone ${isDragging ? 'dragging' : ''}`}
           >
             <Upload
               size={48}
-              className={`mx-auto mb-4 ${
-                isDragging ? 'text-indigo-500' : 'text-gray-400'
-              }`}
+              className="upload-icon"
             />
-            <p className="text-gray-600 mb-2">
+            <p className="upload-text">
               Drag and drop your image here, or
             </p>
-            <label className="inline-block">
+            <label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="hidden"
+                className="file-input"
               />
-              <span className="text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer underline">
+              <span className="browse-link">
                 browse files
               </span>
             </label>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="upload-hint">
               PNG, JPG, GIF up to 10MB
             </p>
           </div>
 
           {/* File Info */}
           {image && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+            <div className="file-info">
+              <div className="file-details">
+                <div>
+                  <p className="file-name">
                     {image.name}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="file-size">
                     {(image.size / 1024).toFixed(2)} KB
                   </p>
                 </div>
@@ -174,20 +170,16 @@ export default function ProfileImageUpload() {
           <button
             onClick={handleUpload}
             disabled={!image || uploading}
-            className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
-              image && !uploading
-                ? 'bg-black text-white hover:bg-gray-800'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
+            className={`upload-button ${image && !uploading ? 'active' : 'disabled'}`}
           >
             {uploading ? 'Uploading...' : 'Upload Image'}
           </button>
 
           {/* Progress Bar */}
           {uploading && uploadProgress > 0 && (
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="progress-container">
               <div
-                className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                className="progress-bar"
                 style={{ width: `${uploadProgress}%` }}
               ></div>
             </div>
