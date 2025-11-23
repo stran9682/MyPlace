@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
@@ -135,7 +134,7 @@ public class ProfileController : ControllerBase
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, profile.Id),
+            new (ClaimTypes.Name, profile.Id),
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]!));
@@ -245,7 +244,8 @@ public class ProfileController : ControllerBase
 
             Pictures = profile.Pictures,
             SuggestionType = profile.OutgoingMatchRequests.Count == 0 
-                ? SuggestionType.Suggestion : SuggestionType.Pending
+                ? SuggestionType.Suggestion : SuggestionType.Pending    // accepted and rejected profiles
+                                                                        // will show up as suggestions
         };
         
         return profileOutDto;
@@ -264,22 +264,8 @@ public class ProfileController : ControllerBase
             .Include(request => request.Sender)         // Yes, I am retrieving the entire thing. 
             .FirstOrDefaultAsync(request => request.ReceiverId == userId && request.SenderId == receiverId);
         
-        if (matchRequest is not null && matchRequest.State != State.Pending)
-            return Ok("no request sent, outgoing request no longer pending");
-        
-        // You're accepting a request here
-        if (matchRequest is not null)
-        {
-            _profileContext.Groups.Add(new Group()
-            {
-                GroupName = $"{matchRequest.Receiver.UserName}-{matchRequest.Sender.UserName}",
-                Profiles = {matchRequest.Sender,  matchRequest.Receiver}    // BUT HE SCORES!!!
-            });
-            
-            matchRequest.State = State.Accepted;
-        }
         // You're sending a request here
-        else
+        if (matchRequest is null)
         {
             MatchRequest request = new()
             {
@@ -292,10 +278,25 @@ public class ProfileController : ControllerBase
                                                                 // which is what we want lol!!! but not the correct way
                                                                 // to handle this, I.E very bad practice. 
         }
+        // You're accepting a request here, or modifying a request you may have rejected.
+        else if (matchRequest.State != State.Accepted)
+        {
+            _profileContext.Groups.Add(new Group()
+            {
+                GroupName = $"{matchRequest.Receiver.UserName}-{matchRequest.Sender.UserName}",
+                Profiles = {matchRequest.Sender,  matchRequest.Receiver}    // BUT HE SCORES!!!
+            });
+            
+            matchRequest.State = State.Accepted;
+        }
+        // Can't send a request to someone who's accepted already!
+        else
+        {
+            return Ok("No request sent, they've already accepted!"); 
+        }
         
         await _profileContext.SaveChangesAsync();
         
         return Ok();
     }
-    
 }

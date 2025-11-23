@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace DataLibrary;
 
 public class ProfileOutDTO
@@ -9,6 +11,7 @@ public class ProfileOutDTO
     public ICollection<PictureModel> Pictures { get; set; } = new List<PictureModel>();
     public string Bio { get; set; }
     
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public SuggestionType? SuggestionType { get; set; }
 }
 

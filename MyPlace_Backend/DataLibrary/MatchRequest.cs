@@ -16,6 +16,7 @@ public class MatchRequest
     [JsonIgnore]
     public Profile Receiver { get; set; } = null!;
     
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public State State { get; set; }
 }
 
