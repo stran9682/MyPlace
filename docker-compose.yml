@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:16-alpine
     container_name: postgres-container
     restart: always
     environment:
@@ -13,6 +13,11 @@ services:
       - postgres_data:/var/lib/postgresql/data  # Persist data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d profiles"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:latest
@@ -58,7 +63,8 @@ services:
       dockerfile: MigrationApplication/Dockerfile
     container_name: migrator
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
       - ElasticSettings__Url=http://elasticsearch:9200
@@ -67,6 +73,7 @@ services:
       - connections
     ports:
       - "5025:8080"
+    restart: on-failure
   
   elasticsearch:
     container_name: els

@@ -1,12 +1,7 @@
-.header-bg {
-  background-color: rgba(255, 255, 255, 0.64);
-
-}
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 13px 50px;
     font-family: 'Be Vietnam Pro', sans-serif;
   }
   
@@ -18,19 +13,30 @@
     font-weight: 400;
     color: #333;
     position: relative;
-    top: 6px;
+    padding-left: 10px;
   }
   
   .nav {
     display: flex;
     gap: 30px;
+    margin-top: 10px;
+  }
+
+  .login-btn-container {
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 35px;
+    padding-right: 35px;
+    border-radius: 40px;
+    background-color: rgb(47, 47, 47);
   }
   
   .nav a {
     text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    font-weight: 800;
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
   }
   
   .nav a:hover {

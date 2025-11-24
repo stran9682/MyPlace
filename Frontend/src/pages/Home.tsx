@@ -6,9 +6,7 @@ import signalRService from "../../services/SignalRService";
 
 export const Home = () => {
     return <>
-      <div className='header-bg'>
-        <Header />
-      </div>
+      <Header />
       <LandingContent />
   </>
 }

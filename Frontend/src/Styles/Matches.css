@@ -5,7 +5,7 @@
 }
 
 .matches-content {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.82);
     color: rgb(47, 47, 47);
     padding: 30px 60px;
     border-radius: 40px;
@@ -127,7 +127,7 @@
 }
 
 .profile-block3 {
-    background-color: rgba(255, 255, 255, 0.854);
+    background-color: rgba(246, 246, 246, 0.854);
     align-self: center;
     width: 95%;
     height: 250px;
