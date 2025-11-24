@@ -1,6 +1,7 @@
 using DataLibrary;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MigrationApplication.Configurations;
 using MigrationApplication.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,8 @@ builder.Services.AddIdentity<Profile, IdentityRole>(options =>  // adding identi
     .AddEntityFrameworkStores<ProfileContext>();
 
 builder.Services.AddTransient<IdentityDataSeeder>();
+
+builder.Services.Configure<ElasticSettings>(builder.Configuration.GetSection("ElasticSettings"));
 
 var app = builder.Build();
 

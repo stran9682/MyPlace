@@ -121,6 +121,10 @@ public class ProfileController : ControllerBase
             }
         }
         
+        profile.Attributes.TraitVector = [
+            profile.Attributes.Cleanliness, profile.Attributes.Personality, profile.Attributes.HoursAwake
+        ];
+        
         var updatePostgres = await _userManager.UpdateAsync(profile);
         if (!updatePostgres.Succeeded) return BadRequest("Postgres Failure");
 
@@ -188,7 +192,8 @@ public class ProfileController : ControllerBase
         
         if (userProfile?.Attributes == null) return BadRequest();
         
-        // Get some recommendations
+        // Get some recommendations,
+        // but it's very much possible that you can run out of people to match with... so hopefully not
         List<string>? elasticSearchQuery = await _elasticService.GetSimilarAttributes(userProfile.Attributes); 
         if  (elasticSearchQuery is null) return BadRequest();
         
@@ -199,6 +204,7 @@ public class ProfileController : ControllerBase
                                                                              
         // remove people you've sent a request to already
         recommendationsIds.ExceptWith(userProfile.OutgoingMatchRequests.Select(x => x.ReceiverId));
+        recommendationsIds.Remove(userProfile.Id);
         
         // Get Ids of pending requesters
         var pendingRequests = userProfile.IncomingMatchRequests
@@ -224,6 +230,7 @@ public class ProfileController : ControllerBase
         var personalId = User.FindFirstValue(ClaimTypes.Name);
         if (personalId is null) return Unauthorized();
         
+        // we're going to need a lot of data here...
         Profile? profile = await _userManager.Users
             .Include(profile => profile.Attributes) 
             .Include(profile => profile.Pictures)
@@ -284,7 +291,8 @@ public class ProfileController : ControllerBase
             _profileContext.Groups.Add(new Group()
             {
                 GroupName = $"{matchRequest.Receiver.UserName}-{matchRequest.Sender.UserName}",
-                Profiles = {matchRequest.Sender,  matchRequest.Receiver}    // BUT HE SCORES!!!
+                Profiles = {matchRequest.Sender,  matchRequest.Receiver}    // BUT HE SCORES!!! getting the entire
+                                                                            // profile was useful after all
             });
             
             matchRequest.State = State.Accepted;

@@ -29,11 +29,6 @@ public class ElasticService
         _client = new ElasticsearchClient(clientSettings);
     }
     
-    public async Task CreateAttributeIndex()
-    {
-        // ill think about it...
-    }
-
     public async Task<bool> AddOrUpdate(ProfileAttributes attributes)
     {
         var response = await _client.IndexAsync(attributes, idx =>
@@ -42,29 +37,13 @@ public class ElasticService
         
         return response.IsValidResponse;
     }
-
-    public async Task<ProfileAttributes?> GetAttributes(string key)
-    {
-        var response = await _client.GetAsync<ProfileAttributes>(key, g => g
-            .Index(_elasticSettings.DefaultIndex));
-
-        return response.Source;
-    }
-
-    public async Task<ProfileAttributes?> GetByProfileId(string profileId)
-    {
-        var response = await _client.SearchAsync<ProfileAttributes>(query => query
-            .Indices(_elasticSettings.DefaultIndex).Query(forProfile => forProfile
-                .Term(match => match
-                    .Field(profile => profile.ProfileId).Value(profileId))));
-        
-        return response.IsValidResponse ?  response.Documents.First() : null;
-    }
-
+    
     public async Task<List<ProfileAttributes>?> GetAllAttributes()
     {
         var response = await _client.SearchAsync<ProfileAttributes>(s =>
-            s.Indices(_elasticSettings.DefaultIndex));
+            s.Indices(_elasticSettings.DefaultIndex)
+                .Size(10000)
+                .Query(q => q.MatchAll()));
         
         return response.IsValidResponse ?  response.Documents.ToList() : null;
     }
@@ -76,17 +55,20 @@ public class ElasticService
         
         return response.IsValidResponse;
     }
-
-    // TODO fix this up!
+    
     public async Task<List<string>?> GetSimilarAttributes(ProfileAttributes attributes)
     {
-        var response = await _client.SearchAsync<ProfileAttributes>(s => s.Query(q => q
-            .MoreLikeThis(mlt => mlt
-                .Fields(profileAttributes => profileAttributes.Bio)
-                .Like(like => like.Text(attributes.Bio))
-                .MinDocFreq(1)
-                .MinTermFreq(1))));
+        var response = await _client.SearchAsync<ProfileAttributes>(s => s
+            .Indices(_elasticSettings.DefaultIndex)
+            .Knn(field => field
+                .Field(profile => profile.TraitVector)
+                .QueryVector(attributes.TraitVector)
+                .K(100)
+                .NumCandidates(100))
+            .Size(100)
+            .Fields(x => x
+                .Field(profile => profile.ProfileId)));
         
-        return response.IsValidResponse ?  response.Documents.Select(x => x.ProfileId).ToList() : null;
+        return response.Documents.Select(profile => profile.ProfileId).ToList();
     }
 }

@@ -39,7 +39,7 @@ public class PictureController : Controller
         PictureModel model = new PictureModel
         {
             ProfileId = id,
-            FileName = file.FileName
+            FileName = $"{id}/{file.FileName}"
         };
     
         //  I AM COMPLETELY RELYING ON ID BEING VALID!!

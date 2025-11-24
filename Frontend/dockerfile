@@ -9,6 +9,7 @@ COPY . .
 
 ENV VITE_CHATHUB_URL=/chathub
 ENV VITE_API_URL=/api
+VITE_UPLOAD_URL=/Picture
 
 RUN npm install && npm run build
 

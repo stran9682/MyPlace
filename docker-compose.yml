@@ -61,6 +61,8 @@ services:
       - postgres
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
+      - ElasticSettings__Url=http://elasticsearch:9200
+      - ElasticSettings__DefaultIndex=profile_attributes
     networks:
       - connections
     ports:
@@ -79,18 +81,6 @@ services:
     networks:
       - connections
     
-  kibana: 
-    container_name: kibana
-    image: kibana:9.2.1
-    ports: 
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    networks:
-      - connections
-  
   minio:
     container_name: minio
     image: minio/minio

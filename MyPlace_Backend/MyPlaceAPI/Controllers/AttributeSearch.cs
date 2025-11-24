@@ -1,3 +1,4 @@
+using DataLibrary;
 using Microsoft.AspNetCore.Mvc;
 using MyPlaceAPI.Services;
 
@@ -15,9 +16,9 @@ public class AttributeSearch : ControllerBase
     }
     
     [HttpGet("get-user")]
-    public async Task<IActionResult> GetProfileAttributes(string key)
+    public async Task<IActionResult> GetProfileAttributes(ProfileAttributes attributes)
     {
-        var user = await _elasticService.GetAttributes(key);
+        var user = await _elasticService.GetSimilarAttributes(attributes);
         return user != null ? Ok(user) : NotFound();
     }
 
