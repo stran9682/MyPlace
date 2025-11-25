@@ -126,7 +126,9 @@ public class ProfileController : ControllerBase
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, profile.Id),
+            new Claim(ClaimTypes.NameIdentifier, profile.Id),
+            
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // JWT ID
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]!));

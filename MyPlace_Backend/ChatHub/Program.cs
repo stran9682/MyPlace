@@ -39,6 +39,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
         };
 
+        // Allow JWT from query string for SignalR
         jwtOptions.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>

@@ -125,7 +125,7 @@ public class MessageController : ControllerBase
     [HttpPost("create-group")]
     public async Task<ActionResult<Group>> CreateGroup([FromBody] CreateGroupRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
 
         var currentUser = await _context.Users.FindAsync(userId);
@@ -160,6 +160,7 @@ public class MessageController : ControllerBase
         };
 
         _context.Groups.Add(newGroup);
+        
         await _context.SaveChangesAsync();
 
         return Ok(new
