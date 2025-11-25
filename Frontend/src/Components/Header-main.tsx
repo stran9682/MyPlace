@@ -12,11 +12,16 @@ function Headermain(): ReactElement {
                     <Link to="/matches">Matches</Link>
                 </div>
                 <div>
-                    <Link to="/login">Messages</Link>
+                    <Link to="/messages">Messages</Link>
                 </div>
                 <div>
                     <Link to="/signup">Profile</Link>
                 </div>
+
+                <div>
+                    <Link to="/users">Users</Link>  {/* 👈 Change this */}
+                </div>
+                
             </nav>
         </header>
     );
