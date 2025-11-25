@@ -307,4 +307,24 @@ public class ProfileController : ControllerBase
         
         return Ok();
     }
+
+    [Authorize]
+    [HttpPost("reject-request")]
+    public async Task<IActionResult> RejectRequest(string receiverId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Name);
+        if (userId is null) return Unauthorized();
+        
+        // request to you already exists
+        var matchRequest = await _profileContext.Matches
+            .FirstOrDefaultAsync(request => request.ReceiverId == userId && request.SenderId == receiverId);
+        
+        if (matchRequest is null) return BadRequest(); // what are you doing rejecting someone from the get-go!
+                                                       // you're so mean!
+        
+        matchRequest.State = State.Rejected;
+        await _profileContext.SaveChangesAsync();
+        
+        return Ok();
+    }
 }

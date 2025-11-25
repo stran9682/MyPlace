@@ -6,7 +6,7 @@ function Header(): ReactElement {
 
     return (
         <header className="header">
-            <div className="logo">MyPlace</div>
+            <Link to="/" className="logo">MyPlace</Link>
             <nav className="nav">
                 <div className='login-btn-container'>
                     <Link to="/login">Log in</Link>

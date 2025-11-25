@@ -2,12 +2,12 @@ import '../Styles/Headermain.css'
 import type { ReactElement } from 'react'
 import { Link } from 'react-router-dom'
 
-function Headermain(): ReactElement {
+const Headermain = ({handleLogout} : {handleLogout : () => void}) => {
 
     return (
         <header className="header">
-            <div className="logo">MyPlace</div>
-            <nav className="settings">
+            <Link to="/" className="logo">MyPlace</Link>
+            <nav className="nav">
                 <div className="matches-navbtn">
                     <Link to="/matches">Matches</Link>
                 </div>
@@ -17,6 +17,8 @@ function Headermain(): ReactElement {
                 <div>
                     <Link to="/signup">Profile</Link>
                 </div>
+
+                <div onClick={() => handleLogout()}>Log out</div>
             </nav>
         </header>
     );

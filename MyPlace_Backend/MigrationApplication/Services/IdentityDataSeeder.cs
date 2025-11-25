@@ -44,13 +44,18 @@ public class IdentityDataSeeder
     
     public async Task SeedAsync()
     {
+        if (_userManager.Users.Any())
+        {
+            return;
+        }
+        
         Random random = new Random();
         
         for (int i = 0; i < 500; i++)
         {
-            var cleanliness = random.Next(11);
-            var hoursAwake = random.Next(11);
-            var personality = random.Next(11);
+            var cleanliness = random.Next(10) + 1;
+            var hoursAwake = random.Next(10) + 1;
+            var personality = random.Next(10) + 1;
             
             ProfileAttributes attributes = new()
             {

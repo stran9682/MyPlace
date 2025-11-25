@@ -18,14 +18,15 @@ public class ChatHub : Hub
     
     public override async Task OnConnectedAsync()
     {
-       await _profileContext.Groups
+       var groups = await _profileContext.Groups
             .Where(group => group.Profiles.Select(profile => profile.Id)
                 .Contains(Context.User.FindFirst(ClaimTypes.Name).Value))
             .Select(group => group.GroupName)
             .ToListAsync();
        
-       Console.WriteLine(Context.User.FindFirst(ClaimTypes.Name).Value);
+       foreach (var group in groups)
+       {
+           await Groups.AddToGroupAsync(Context.User.Identity.Name, group);
+       }
     }
-    
-    
 }

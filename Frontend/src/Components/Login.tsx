@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react'
 import Cookies from 'js-cookie';
+import signalRService from "../../services/SignalRService";
 
 
 const header = import.meta.env.VITE_API_URL;
 
-function Login(): ReactElement {
+const Login = ({setJwt} : {setJwt : (jwt : string) => void}) => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -43,11 +44,11 @@ function Login(): ReactElement {
 
             if (response.ok) {
                 const token = await response.text();
-                Cookies.set('token', token, {
-                    expires: 1/48,
-                    sameSite: 'strict',
-                    secure: true
-                    });
+                localStorage.setItem('jwtToken', token);
+                setJwt(token)
+
+                signalRService.StartConnection(token);
+                
                 navigate('/matches');
             } else {
                 setError('There was a problem logging in. Please try again.');
