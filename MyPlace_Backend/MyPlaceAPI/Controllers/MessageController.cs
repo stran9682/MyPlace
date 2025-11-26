@@ -21,25 +21,49 @@ public class MessageController : ControllerBase
     [HttpGet("get-messages/{groupId}")]
     public async Task<ActionResult<List<Message>>> GetMessages(int groupId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
-        if (userId == null) return Unauthorized();
-
-        var group = await _context.Groups
-            .Include(g => g.Profiles)
-            .FirstOrDefaultAsync(g => g.Id == groupId);
-
-        if (group == null || !group.Profiles.Any(p => p.Id == userId))
+        try
         {
-            return Forbid();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    
+            Console.WriteLine($"📨 GetMessages called for group {groupId} by user {userId}");
+    
+            if (userId == null) 
+            {
+                Console.WriteLine("❌ User not authenticated");
+                return Unauthorized();
+            }
+
+            var group = await _context.Groups
+                .Include(g => g.Profiles)
+                .FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (group == null)
+            {
+                Console.WriteLine($"❌ Group {groupId} not found");
+                return NotFound("Group not found");
+            }
+    
+            if (!group.Profiles.Any(p => p.Id == userId))
+            {
+                Console.WriteLine($"❌ User {userId} not in group {groupId}");
+                return Forbid();
+            }
+
+            var messages = await _context.Set<Message>()
+                .Where(m => m.GroupId == groupId)
+                .OrderBy(m => m.Timestamp)
+                .Take(100)
+                .ToListAsync();
+
+            Console.WriteLine($"✅ Returning {messages.Count} messages");
+            return Ok(messages);
         }
-
-        var messages = await _context.Set<Message>()
-            .Where(m => m.GroupId == groupId)
-            .OrderBy(m => m.Timestamp)
-            .Take(100) // Limit to last 100 messages for performance
-            .ToListAsync();
-
-        return Ok(messages);
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error in GetMessages: {ex.Message}");
+            Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 
     [HttpGet("get-messages/{groupId}/paginated")]
@@ -48,7 +72,7 @@ public class MessageController : ControllerBase
         [FromQuery] int pageSize = 50, 
         [FromQuery] int? beforeMessageId = null)
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
 
         var group = await _context.Groups

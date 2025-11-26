@@ -18,8 +18,8 @@ function ChatMessage({ username, messageText, timestamp, isOwnMessage }: ChatMes
     };
 
     return (
-        <div className={`message ${isOwnMessage ? 'own-message' : 'other-message'}`}>
-            <div className="message-content">
+        <div className={`chat-message ${isOwnMessage ? 'own-message' : 'other-message'}`}>
+            <div className="message-bubble">
                 {!isOwnMessage && <div className="message-username">{username}</div>}
                 <div className="message-text">{messageText}</div>
                 <div className="message-time">{formatTime(timestamp)}</div>

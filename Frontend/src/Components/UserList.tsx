@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../Styles/UserList.css';
 
 interface User {
@@ -18,35 +19,55 @@ function UserList() {
     const [creatingChat, setCreatingChat] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const token = localStorage.getItem('jwt_token') || '';
-    const currentUserId = localStorage.getItem('user_id') || '';
+    const { token, userId: currentUserId } = useAuth();
+
+    // Fallback to localStorage
+    const activeToken = token || localStorage.getItem('jwt_token') || '';
+    const activeUserId = currentUserId || localStorage.getItem('user_id') || '';
 
     useEffect(() => {
-        loadUsers();
-    }, []);
+        console.log('UserList - Token exists:', !!activeToken);
+        console.log('UserList - Current user ID:', activeUserId);
+
+        if (activeToken) {
+            loadUsers();
+        }
+    }, [activeToken]);
 
     const loadUsers = async () => {
         try {
             const response = await fetch(`${API_URL}/Profile/getprofile`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${activeToken}`
                 }
             });
 
             if (response.ok) {
                 const data = await response.json();
+                console.log('✅ Loaded users:', data.length);
+                console.log('🔍 Current user ID:', activeUserId);
+                console.log('🔍 All user IDs:', data.map((u: User) => u.id));
+
                 // Filter out current user
-                const otherUsers = data.filter((user: User) => user.id !== currentUserId);
+                const otherUsers = data.filter((user: User) => {
+                    console.log(`Comparing: "${user.id}" !== "${activeUserId}" = ${user.id !== activeUserId}`);
+                    return user.id !== activeUserId;
+                });
+
+                console.log('✅ Filtered users:', otherUsers.length);
                 setUsers(otherUsers);
+            } else {
+                console.error('❌ Failed to load users:', response.status);
             }
         } catch (err) {
-            console.error('Error loading users:', err);
+            console.error('❌ Error loading users:', err);
         } finally {
             setLoading(false);
         }
     };
 
     const handleStartChat = async (otherUserId: string, userName: string) => {
+        console.log('💬 Starting chat with:', userName);
         setCreatingChat(otherUserId);
 
         try {
@@ -54,22 +75,23 @@ function UserList() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${activeToken}`
                 },
                 body: JSON.stringify({ otherUserId })
             });
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Chat created:', data);
+                console.log('✅ Chat created:', data);
 
                 // Navigate to messages page
                 navigate('/messages');
             } else {
+                console.error('❌ Failed to create chat:', response.status);
                 alert('Failed to create chat');
             }
         } catch (err) {
-            console.error('Error creating chat:', err);
+            console.error('❌ Error creating chat:', err);
             alert('Something went wrong');
         } finally {
             setCreatingChat(null);

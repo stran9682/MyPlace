@@ -1,9 +1,7 @@
-﻿import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useCallback, useRef } from 'react';
 import * as signalR from '@microsoft/signalr';
 
-const CHAT_HUB_URL = import.meta.env.VITE_CHAT_HUB_URL + '/chathub';
-
-export interface Message {
+interface Message {
     id: number;
     username: string;
     messageText: string;
@@ -11,72 +9,98 @@ export interface Message {
     profileId: string;
 }
 
-export const useChatConnection = (token: string | null) => {
+interface UseChatConnectionOptions {
+    onChatListUpdate?: () => void; // ✅ NEW: Callback for chat list updates
+}
+
+export const useChatConnection = (token: string, options?: UseChatConnectionOptions) => {
     const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isConnected, setIsConnected] = useState(false);
     const connectionRef = useRef<signalR.HubConnection | null>(null);
+    const isConnectingRef = useRef(false);
 
     useEffect(() => {
-        if (!token) return;
+        if (!token || connectionRef.current || isConnectingRef.current) {
+            return;
+        }
+
+        isConnectingRef.current = true;
 
         const newConnection = new signalR.HubConnectionBuilder()
-            .withUrl(CHAT_HUB_URL, {
+            .withUrl('http://localhost:5023/chathub', {
                 accessTokenFactory: () => token,
-                skipNegotiation: true,
-                transport: signalR.HttpTransportType.WebSockets
+                skipNegotiation: false,
+                transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling
             })
             .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        connectionRef.current = newConnection;
-        setConnection(newConnection);
-
         newConnection.on('ReceiveMessage', (message: Message) => {
+            console.log('📨 Received message:', message);
             setMessages(prev => [...prev, message]);
+        });
+
+        // ✅ NEW: Listen for chat list updates
+        newConnection.on('UpdateChatList', (groupId: number) => {
+            console.log('🔄 Chat list update requested for group:', groupId);
+            options?.onChatListUpdate?.();
+        });
+
+        newConnection.onclose(() => {
+            console.log('❌ Connection closed');
+            setIsConnected(false);
+        });
+
+        newConnection.onreconnecting(() => {
+            console.log('🔄 Reconnecting...');
+            setIsConnected(false);
+        });
+
+        newConnection.onreconnected(() => {
+            console.log('✅ Reconnected');
+            setIsConnected(true);
         });
 
         newConnection.start()
             .then(() => {
-                console.log('Connected to ChatHub');
+                console.log('✅ SignalR Connected');
                 setIsConnected(true);
+                connectionRef.current = newConnection;
+                setConnection(newConnection);
             })
-            .catch(err => console.error('Connection failed: ', err));
+            .catch(err => {
+                console.error('❌ SignalR Connection Error:', err);
+                isConnectingRef.current = false;
+            });
 
         return () => {
-            newConnection.stop();
+            if (connectionRef.current) {
+                console.log('🔌 Cleaning up connection');
+                connectionRef.current.stop();
+                connectionRef.current = null;
+            }
         };
-    }, [token]);
+    }, [token, options?.onChatListUpdate]);
 
-    const sendMessage = async (groupId: number, messageText: string) => {
-        if (connection && isConnected) {
-            try {
-                await connection.invoke('SendMessage', groupId, messageText);
-            } catch (err) {
-                console.error('Error sending message:', err);
-            }
+    const joinGroup = useCallback(async (groupId: number) => {
+        if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+            throw new Error('Not connected');
         }
-    };
 
-    const joinGroup = async (groupId: number) => {
-        if (connection && isConnected) {
-            try {
-                await connection.invoke('JoinGroup', groupId);
-            } catch (err) {
-                console.error('Error joining group:', err);
-            }
-        }
-    };
+        console.log('🚪 Joining group:', groupId);
+        await connection.invoke('JoinGroup', groupId);
+    }, [connection]);
 
-    const leaveGroup = async (groupId: number) => {
-        if (connection && isConnected) {
-            try {
-                await connection.invoke('LeaveGroup', groupId);
-            } catch (err) {
-                console.error('Error leaving group:', err);
-            }
+    const sendMessage = useCallback(async (groupId: number, messageText: string) => {
+        if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+            throw new Error('Not connected');
         }
-    };
+
+        console.log('📤 Sending message to group:', groupId);
+        await connection.invoke('SendMessage', groupId, messageText);
+    }, [connection]);
 
     return {
         connection,
@@ -84,7 +108,6 @@ export const useChatConnection = (token: string | null) => {
         isConnected,
         sendMessage,
         joinGroup,
-        leaveGroup,
         setMessages
     };
 };

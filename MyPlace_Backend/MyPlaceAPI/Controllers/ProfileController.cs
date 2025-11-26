@@ -126,25 +126,25 @@ public class ProfileController : ControllerBase
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, profile.Id),
-            
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // JWT ID
+            new Claim(ClaimTypes.NameIdentifier, profile.Id),  // ✅ This stays
+            new Claim(ClaimTypes.Name, profile.Id),            // ✅ ADD THIS - ChatHub uses ClaimTypes.Name
+            new Claim(JwtRegisteredClaimNames.Sub, profile.Id),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
-        
+    
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        
+    
         var tokenDescriptor = new JwtSecurityToken(
             issuer: _configuration["Tokens:Issuer"],
             audience: _configuration["Tokens:Audience"],
             claims: claims,
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: credentials);
-        
+    
         var tokenHandler = new JwtSecurityTokenHandler();
-        
         var token = tokenHandler.WriteToken(tokenDescriptor);
-        
+    
         return token;
     }
 
