@@ -1,5 +1,4 @@
 import Matches from '../Components/Matches'
-import Headermain from '../Components/Header-main'
 import { useEffect, useState } from "react";
 
 const header = import.meta.env.VITE_API_URL
@@ -71,7 +70,7 @@ export const Matchespage = () => {
     return (
         <div className="matches-page">
             {ids.length != 0 ? 
-                index <= ids.length ? 
+                index <= ids.length && profileQueue[0] != undefined? 
                     <Matches profile={profileQueue[0]} handleNextProfile={handleNextProfile}/> 
                 :
                     <h1>We low-key ran out of profiles for you, maybe try again a little later?</h1>

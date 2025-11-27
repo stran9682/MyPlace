@@ -1,22 +1,35 @@
 .matches-page {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    height: 87vh;
 }
 
 .matches-content {
     background-color: rgba(255, 255, 255, 0.82);
     color: rgb(47, 47, 47);
-    padding: 30px 60px;
+    padding: 20px 20px;
     border-radius: 40px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    width: 550px;
-    height: 500px;
+   
     display: flex;
     flex-direction: column;
     align-self: center;
-    row-gap: 10px;
-    border: 3px solid #a0a0a077;
+    /* border: 3px solid #a0a0a077; */
+    width: 27%;
+    overflow-y: scroll;
+}
+
+.suggestion {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes lootbox {
+    0% {box-shadow: 0 8px 80px rgba(0, 0, 0, 0.3);}
+    100% {box-shadow: 0px 8px 80px 40px #CCCCFF;}
+}
+
+.pending {
+    animation: lootbox 1s ease-out infinite alternate;
 }
 
 .matches-profile-info{
@@ -25,10 +38,9 @@
 }
 
 .profile-block1 h1 {
-    font-size: 36px;
-    margin: 0px;
-    padding-bottom: 15px;
-    padding-left: 30px;
+    font-size: 2em;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .profile-block1 p {
@@ -39,18 +51,13 @@
 }
 
 .hzr{
-    margin-top: 40px;
+    margin-top: 10px;
     height: 3px;
     background-color: #a0a0a077;
     border: none;
     border-radius: 3px;
 }
 
-.profile-block1 {
-    display: flex;
-    width: 100%;
-    padding-top: 5px;
-}
 
 .block1-photo {
     overflow: hidden;
@@ -74,12 +81,22 @@
 }
 
 .profile-block2 {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    height:100px;
     width: 100%;
-    padding-top: 6px;
+}
+
+.profile-block2 .btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    background-color: #555;
+    color: white;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
 }
 
 .block2-item1 {
@@ -152,6 +169,7 @@
     display: flex;
     gap: 15px;
     align-self: center;
+    width: 29%;
 }
 
 .btn-skip {
@@ -163,7 +181,6 @@
     font-size: 18px;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 300px;
     width: 100%;
 }
 
@@ -182,7 +199,6 @@
     font-size: 18px;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 300px;
     width: 100%;
 }
 

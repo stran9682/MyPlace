@@ -18,15 +18,30 @@ public class ChatHub : Hub
     
     public override async Task OnConnectedAsync()
     {
-       var groups = await _profileContext.Groups
-            .Where(group => group.Profiles.Select(profile => profile.Id)
-                .Contains(Context.User.FindFirst(ClaimTypes.Name).Value))
-            .Select(group => group.GroupName)
-            .ToListAsync();
+       var groupIds = await _profileContext.Users
+           .Where(identity => identity.Id == Context.User.Identity.Name)
+           .SelectMany(user => user.Groups)
+           .Select(group => group.Id)
+           .ToListAsync();
        
-       foreach (var group in groups)
+       foreach (var group in groupIds)
        {
-           await Groups.AddToGroupAsync(Context.User.Identity.Name, group);
+           await Groups.AddToGroupAsync(Context.User.Identity.Name, group.ToString());
        }
+    }
+
+    public async Task SendMessage(Message message)
+    {
+        await Clients.Group(message.GroupId.ToString()).SendAsync("ReceiveMessage", message);
+
+        var group = _profileContext.Groups
+            .Include(group => group.Messages)
+            .FirstOrDefault(group => group.Id == message.GroupId);
+        
+        if ( group is null ) return;
+        
+        group.Messages.Add(message);
+        
+        await _profileContext.SaveChangesAsync();
     }
 }

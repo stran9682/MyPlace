@@ -32,24 +32,24 @@ function App(): ReactElement {
   }, []);
 
   const handleLogout = () => {
-      navigate("/");
-      localStorage.removeItem('jwtToken');
-      setJwt(null);
-    };
+    navigate("/");
+    localStorage.removeItem('jwtToken');
+    setJwt(null);
+  };
 
   return(
     <>
       {!jwt ? <Header/> : <Headermain handleLogout={handleLogout}/>}
 
       <main>
-      <Routes>
-        <Route path="/" element={<Home/>} />
-        <Route path="/login" element={<Loginpage setJwt={setJwt}/>} />
-        <Route path="/signup" element={<Signuppage/>} />
-        <Route path="/matches" element={<Matchespage/>} />
-        <Route path="/upload" element={<Profilepage/>} />
-      </Routes>
-    </main>
+        <Routes>
+          <Route path="/" element={<Home/>} />
+          <Route path="/login" element={<Loginpage setJwt={setJwt}/>} />
+          <Route path="/signup" element={<Signuppage/>} />
+          <Route path="/matches" element={<Matchespage/>} />
+          <Route path="/upload" element={<Profilepage/>} />
+        </Routes>
+      </main>
     </>
   );
 }

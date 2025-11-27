@@ -236,7 +236,6 @@ public class ProfileController : ControllerBase
             .Include(profile => profile.Pictures)
             .Include(profile => profile.OutgoingMatchRequests
                 .Where(mr => mr.ReceiverId == personalId && mr.State == State.Pending))
-            .Include(profile => profile.Groups)
             .FirstOrDefaultAsync(identity => identity.Id == userId);
         
         if (profile is null) return NotFound();
@@ -326,5 +325,66 @@ public class ProfileController : ControllerBase
         await _profileContext.SaveChangesAsync();
         
         return Ok();
+    }
+
+    [Authorize]
+    [HttpPost("get-matches")]
+    public async Task<IActionResult> GetMatches()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Name);
+        if (userId is null) return Unauthorized();
+
+        var accepts = await _profileContext.Matches
+            .Where(match => match.ReceiverId == userId || match.SenderId == userId
+                && match.State == State.Accepted)
+            .Select(match => userId == match.ReceiverId ? match.SenderId : match.ReceiverId)
+            .ToListAsync();
+        
+        return Ok(accepts);
+    }
+
+    [Authorize]
+    [HttpPost("get-groups")]
+    public async Task<IActionResult> GetGroups()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Name);
+        if (userId is null) return Unauthorized();
+
+        var groups = await _userManager.Users
+            .Where(identity => identity.Id == userId)
+            .Select(user => user.Groups).ToArrayAsync();
+        
+        return Ok(groups);
+    }
+    
+    [Authorize]
+    [HttpPost("create-group")]
+    public async Task<IActionResult> CreateGroup(List<string> userIds)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Name);
+        if (userId is null) return Unauthorized();
+        
+        var accepts = await _profileContext.Matches
+            .Where(match => match.ReceiverId == userId || match.SenderId == userId
+                && match.State == State.Accepted)
+            .Select(match => userId == match.ReceiverId ? match.SenderId : match.ReceiverId)
+            .ToHashSetAsync();
+        
+        accepts.IntersectWith(userIds); // ONLY add the people you have matched with
+
+        var profiles = await _profileContext.Users
+            .Where(x => accepts.Contains(x.Id))
+            .ToListAsync();
+        
+        var group = new Group()
+        {
+            Profiles = profiles,
+        };
+        
+        _profileContext.Groups.Add(group);
+        
+        await _profileContext.SaveChangesAsync();
+        
+        return Ok(group);
     }
 }
