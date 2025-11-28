@@ -10,6 +10,10 @@ public class Profile : IdentityUser
 
     [MaxLength(32)] [Required] 
     public string LastName { get; set; } = null!;
+
+    public bool IsOnline { get; set; } = false;
+    
+    public DateTime? LastSeen { get; set; } = null;
     
     //  I'd rather this be null
     //  than set this with some default values

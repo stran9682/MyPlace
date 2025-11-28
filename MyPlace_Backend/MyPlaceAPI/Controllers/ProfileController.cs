@@ -77,8 +77,32 @@ public class ProfileController : ControllerBase
         var result = await _signInManager.CheckPasswordSignInAsync(user, profile.Password, false);
         
         if (!result.Succeeded) return Unauthorized();
-
+        
+        user.IsOnline = true;
+        user.LastSeen = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+        
         return GenerateJwtToken(user);
+    }
+    
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Name);
+        if (userId is null) return Unauthorized();
+    
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return Unauthorized();
+    
+        // ✅ Set user as offline
+        user.IsOnline = false;
+        user.LastSeen = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+    
+        await _signInManager.SignOutAsync();
+    
+        return Ok();
     }
     
     [Authorize]
@@ -155,8 +179,20 @@ public class ProfileController : ControllerBase
             .Include(profile => profile.Pictures)
             .Include(profile => profile.Attributes)
             .Include(profile => profile.MatchRequests)
+            .Select(p => new {
+                p.Id,
+                p.UserName,
+                p.FirstName,
+                p.LastName,
+                p.Email,
+                p.IsOnline,
+                p.LastSeen,
+                p.Pictures,
+                p.Attributes,
+                p.MatchRequests
+            })
             .ToListAsync();
         
-        return profiles;
+        return Ok(profiles);
     }
 }

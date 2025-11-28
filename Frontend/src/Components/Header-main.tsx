@@ -7,6 +7,7 @@ function Headermain(): ReactElement {
     return (
         <header className="header">
             <div className="logo">MyPlace</div>
+            
             <nav className="settings">
                 <div className="matches-navbtn">
                     <Link to="/matches">Matches</Link>
@@ -19,7 +20,7 @@ function Headermain(): ReactElement {
                 </div>
 
                 <div>
-                    <Link to="/users">Users</Link>  {/* 👈 Change this */}
+                    <Link to="/users">Users</Link>  
                 </div>
                 
             </nav>

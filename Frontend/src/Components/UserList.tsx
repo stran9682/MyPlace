@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import UserStatus from './UserStatus';
 import '../Styles/UserList.css';
 
 interface User {
@@ -9,6 +10,8 @@ interface User {
     firstName: string;
     lastName: string;
     email: string;
+    isOnline?: boolean;
+    lastSeen?: string;
 }
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -83,8 +86,6 @@ function UserList() {
             if (response.ok) {
                 const data = await response.json();
                 console.log('✅ Chat created:', data);
-
-                // Navigate to messages page
                 navigate('/messages');
             } else {
                 console.error('❌ Failed to create chat:', response.status);
@@ -114,6 +115,10 @@ function UserList() {
                         <div className="user-info">
                             <h3>{user.firstName} {user.lastName}</h3>
                             <p className="user-username">@{user.userName}</p>
+                            <UserStatus
+                                isOnline={user.isOnline ?? false}
+                                lastSeen={user.lastSeen}
+                            />
                         </div>
                         <button
                             className="chat-btn"
