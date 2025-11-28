@@ -19,52 +19,73 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet("get-messages/{groupId}")]
-    public async Task<ActionResult<List<Message>>> GetMessages(int groupId)
+public async Task<ActionResult<List<MessageDTO>>> GetMessages(int groupId)
+{
+    try
     {
-        try
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        Console.WriteLine($"📨 GetMessages called for group {groupId} by user {userId}");
+
+        if (userId == null) 
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    
-            Console.WriteLine($"📨 GetMessages called for group {groupId} by user {userId}");
-    
-            if (userId == null) 
-            {
-                Console.WriteLine("❌ User not authenticated");
-                return Unauthorized();
-            }
-
-            var group = await _context.Groups
-                .Include(g => g.Profiles)
-                .FirstOrDefaultAsync(g => g.Id == groupId);
-
-            if (group == null)
-            {
-                Console.WriteLine($"❌ Group {groupId} not found");
-                return NotFound("Group not found");
-            }
-    
-            if (!group.Profiles.Any(p => p.Id == userId))
-            {
-                Console.WriteLine($"❌ User {userId} not in group {groupId}");
-                return Forbid();
-            }
-
-            var messages = await _context.Set<Message>()
-                .Where(m => m.GroupId == groupId)
-                .OrderBy(m => m.Timestamp)
-                .Take(100)
-                .ToListAsync();
-
-            Console.WriteLine($"✅ Returning {messages.Count} messages");
-            return Ok(messages);
+            Console.WriteLine("❌ User not authenticated");
+            return Unauthorized();
         }
-        catch (Exception ex)
+
+        var group = await _context.Groups
+            .Include(g => g.Profiles)
+            .FirstOrDefaultAsync(g => g.Id == groupId);
+
+        if (group == null)
         {
-            Console.WriteLine($"❌ Error in GetMessages: {ex.Message}");
-            Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
-            return StatusCode(500, new { error = ex.Message });
+            Console.WriteLine($"❌ Group {groupId} not found");
+            return NotFound("Group not found");
         }
+
+        if (!group.Profiles.Any(p => p.Id == userId))
+        {
+            Console.WriteLine($"❌ User {userId} not in group {groupId}");
+            return Forbid();
+        }
+
+        // ✅ Load messages with reactions and read receipts
+        var messages = await _context.Message
+            .Where(m => m.GroupId == groupId)
+            .Include(m => m.Reactions)
+            .Include(m => m.ReadReceipts)
+            .OrderBy(m => m.Timestamp)
+            .Take(100)
+            .Select(m => new MessageDTO
+            {
+                Id = m.Id,
+                Username = m.Username,
+                MessageText = m.MessageText,
+                Timestamp = m.Timestamp,
+                ProfileId = m.ProfileId,
+                ReadBy = m.ReadReceipts.Select(rr => rr.ProfileId).ToList(),
+                Reactions = m.Reactions
+                    .GroupBy(r => r.Emoji)
+                    .Select(g => new ReactionDTO
+                    {
+                        Emoji = g.Key,
+                        UserIds = g.Select(r => r.ProfileId).ToList(),
+                        Count = g.Count()
+                    })
+                    .ToList()
+            })
+            .ToListAsync();
+
+        Console.WriteLine($"✅ Returning {messages.Count} messages with reactions and read receipts");
+        return Ok(messages);
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Error in GetMessages: {ex.Message}");
+        Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+        return StatusCode(500, new { error = ex.Message });
+    }
+}
 
     [HttpGet("get-messages/{groupId}/paginated")]
     public async Task<ActionResult<object>> GetMessagesPaginated(

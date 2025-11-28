@@ -4,30 +4,65 @@ import ChatList from '../Components/ChatList';
 import Chatbox from '../Components/Chatbox';
 import { useAuth } from '../context/AuthContext';
 import '../Styles/MessagesPage.css';
+import { useNavigate } from 'react-router-dom';
+
+// Helper functions
+function decodeJWT(token: string) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        console.error('Failed to decode JWT:', e);
+        return null;
+    }
+}
+
+function isTokenExpired(token: string): boolean {
+    try {
+        const decoded = decodeJWT(token);
+        if (!decoded || !decoded.exp) return true;
+
+        const currentTime = Date.now() / 1000;
+        return decoded.exp < currentTime;
+    } catch {
+        return true;
+    }
+}
 
 export const Messagespage = () => {
+    const navigate = useNavigate();
+    const { token, userId: currentUserId } = useAuth();
+    const [isReady, setIsReady] = useState(false);
     const [selectedChat, setSelectedChat] = useState<{
         groupId: number;
         groupName: string;
     } | null>(null);
-
-    const { token, userId: currentUserId } = useAuth();
-    const [isReady, setIsReady] = useState(false);
     const chatListRef = useRef<{ refreshGroups: () => void }>(null);
 
-    // Wait for auth to be ready
+    // ✅ SINGLE useEffect for auth check
     useEffect(() => {
         console.log('Messages page - checking auth...');
         console.log('Token exists:', !!token);
         console.log('User ID:', currentUserId);
 
         if (token && currentUserId) {
+            // Check if token is expired
+            if (isTokenExpired(token)) {
+                console.log('❌ Token expired, redirecting to login');
+                navigate('/login');
+                return;
+            }
+
             console.log('✅ Auth ready');
             setIsReady(true);
         } else {
             console.log('⏳ Waiting for auth...');
             const timer = setTimeout(() => {
-                const storedToken = localStorage.getItem('jwt_token');
+                const storedToken = localStorage.getItem('token');
                 const storedUserId = localStorage.getItem('user_id');
 
                 console.log('Checking localStorage directly:');
@@ -35,17 +70,24 @@ export const Messagespage = () => {
                 console.log('  User ID:', storedUserId);
 
                 if (storedToken && storedUserId) {
+                    // Check if stored token is expired
+                    if (isTokenExpired(storedToken)) {
+                        console.log('❌ Stored token expired, redirecting to login');
+                        navigate('/login');
+                        return;
+                    }
+
                     console.log('✅ Found in localStorage, marking ready');
                     setIsReady(true);
                 } else {
                     console.log('❌ No auth found - redirecting to login');
-                    window.location.href = '/login';
+                    navigate('/login');
                 }
             }, 100);
 
             return () => clearTimeout(timer);
         }
-    }, [token, currentUserId]);
+    }, [token, currentUserId, navigate]);
 
     const handleSelectChat = (groupId: number, groupName: string) => {
         console.log('📱 Selected chat:', groupName, 'ID:', groupId);
@@ -56,7 +98,6 @@ export const Messagespage = () => {
         setSelectedChat(null);
     };
 
-    // ✅ NEW: Callback when a message is sent
     const handleMessageSent = () => {
         console.log('📨 Message sent, refreshing chat list...');
         chatListRef.current?.refreshGroups();
@@ -83,7 +124,7 @@ export const Messagespage = () => {
         );
     }
 
-    const activeToken = token || localStorage.getItem('jwt_token') || '';
+    const activeToken = token || localStorage.getItem('token') || '';
     const activeUserId = currentUserId || localStorage.getItem('user_id') || '';
 
     console.log('Rendering with:', {

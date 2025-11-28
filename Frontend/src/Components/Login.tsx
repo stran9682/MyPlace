@@ -27,6 +27,18 @@ function decodeJWT(token: string) {
     }
 }
 
+function isTokenExpired(token: string): boolean {
+    try {
+        const decoded = decodeJWT(token);
+        if (!decoded || !decoded.exp) return true;
+
+        const currentTime = Date.now() / 1000;
+        return decoded.exp < currentTime;
+    } catch {
+        return true;
+    }
+}
+
 function Login(): ReactElement {
     const navigate = useNavigate();
 
@@ -80,13 +92,13 @@ function Login(): ReactElement {
                 if (userId) {
                     // Store in cookies
                     Cookies.set('token', token, {
-                        expires: 1/48,
+                        expires: 7,
                         sameSite: 'strict',
                         secure: true
                     });
 
                     // ALSO store in localStorage for components that use it
-                    localStorage.setItem('jwt_token', token);
+                    localStorage.setItem('token', token);
                     localStorage.setItem('user_id', userId);
 
                     console.log('✅ Login successful. User ID:', userId);

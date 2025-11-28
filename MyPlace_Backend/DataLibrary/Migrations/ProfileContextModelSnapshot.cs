@@ -76,6 +76,12 @@ namespace DataLibrary.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileUrl")
+                        .HasColumnType("text");
+
                     b.Property<int>("GroupId")
                         .HasColumnType("integer");
 
@@ -101,6 +107,65 @@ namespace DataLibrary.Migrations
                     b.HasIndex("ProfileId");
 
                     b.ToTable("Message");
+                });
+
+            modelBuilder.Entity("DataLibrary.MessageReaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Emoji")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<int>("MessageId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProfileId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("MessageReactions");
+                });
+
+            modelBuilder.Entity("DataLibrary.MessageReadReceipt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MessageId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProfileId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("MessageReadReceipts");
                 });
 
             modelBuilder.Entity("DataLibrary.PictureModel", b =>
@@ -151,10 +216,16 @@ namespace DataLibrary.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime?>("LastSeen")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -424,6 +495,44 @@ namespace DataLibrary.Migrations
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("DataLibrary.MessageReaction", b =>
+                {
+                    b.HasOne("DataLibrary.Message", "Message")
+                        .WithMany("Reactions")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLibrary.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("DataLibrary.MessageReadReceipt", b =>
+                {
+                    b.HasOne("DataLibrary.Message", "Message")
+                        .WithMany("ReadReceipts")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLibrary.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("DataLibrary.PictureModel", b =>
                 {
                     b.HasOne("DataLibrary.Profile", null)
@@ -511,6 +620,13 @@ namespace DataLibrary.Migrations
             modelBuilder.Entity("DataLibrary.Group", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("DataLibrary.Message", b =>
+                {
+                    b.Navigation("Reactions");
+
+                    b.Navigation("ReadReceipts");
                 });
 
             modelBuilder.Entity("DataLibrary.Profile", b =>

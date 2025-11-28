@@ -18,24 +18,41 @@ const API_URL = import.meta.env.VITE_API_URL;
 function Chatbox({ groupId, groupName, token, currentUserId, onClose, onMessageSent }: ChatboxProps): ReactElement {
     const [messageInput, setMessageInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const { messages, isConnected, sendMessage, joinGroup, setMessages } = useChatConnection(token, {
+
+    // ✅ FIXED: Destructure addReaction from useChatConnection
+    const { messages, isConnected, sendMessage, joinGroup, setMessages, addReaction, connection } = useChatConnection(token, {
         onChatListUpdate: onMessageSent
     });
+
     const [hasJoinedGroup, setHasJoinedGroup] = useState(false);
     const [loadingHistory, setLoadingHistory] = useState(true);
+    const hasLoadedHistory = useRef(false);
+    const [totalGroupMembers] = useState(2); 
 
-    
-    
-    // Load message history
+    // Load message history ONCE
     useEffect(() => {
-        loadMessageHistory();
+        if (!hasLoadedHistory.current) {
+            loadMessageHistory();
+            hasLoadedHistory.current = true;
+        }
+
+        return () => {
+            hasLoadedHistory.current = false;
+            setHasJoinedGroup(false);
+        };
     }, [groupId]);
+
+    useEffect(() => {
+        if (connection) {
+            (window as any).connection = connection;
+            console.log('✅ Connection exposed to window');
+        }
+    }, [connection]);
 
     // Join group when connected
     useEffect(() => {
         if (isConnected && !hasJoinedGroup) {
             console.log('✅ Connection ready, joining group', groupId);
-            // Add a small delay to ensure connection is fully established
             const timer = setTimeout(() => {
                 joinGroup(groupId)
                     .then(() => {
@@ -49,7 +66,7 @@ function Chatbox({ groupId, groupName, token, currentUserId, onClose, onMessageS
 
             return () => clearTimeout(timer);
         }
-    }, [isConnected, groupId, hasJoinedGroup]);
+    }, [isConnected, groupId, hasJoinedGroup, joinGroup]);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -103,18 +120,34 @@ function Chatbox({ groupId, groupName, token, currentUserId, onClose, onMessageS
             return;
         }
 
-        console.log('📤 Sending message:', messageInput);
+        console.log('📤 BEFORE sendMessage call');
+        console.log('📤 Group ID:', groupId);
+        console.log('📤 Message:', messageInput);
+        console.log('📤 isConnected:', isConnected);
 
         try {
             await sendMessage(groupId, messageInput);
+            console.log('✅ AFTER sendMessage - SUCCESS');
             setMessageInput('');
-            console.log('✅ Message sent successfully');
-
-            // ✅ NEW: Notify parent that message was sent
             onMessageSent?.();
         } catch (err) {
-            console.error('❌ Failed to send message:', err);
+            console.error('❌ AFTER sendMessage - FAILED');
+            console.error('❌ Error:', err);
+            console.error('❌ Error message:', (err as Error).message);
+            console.error('❌ Error stack:', (err as Error).stack);
             alert('Failed to send message. Please try again.');
+        }
+    };
+
+    // ✅ FIXED: Reaction handler
+    const handleAddReaction = async (messageId: number, emoji: string) => {
+       try {
+       await addReaction(messageId, emoji);
+      console.log('✅ Reaction added:', emoji, 'to message', messageId);
+       } catch (err) 
+       {
+           console.error('❌ Failed to add reaction:', err);
+           console.log('Reactions temporarily disabled');
         }
     };
 
@@ -126,7 +159,6 @@ function Chatbox({ groupId, groupName, token, currentUserId, onClose, onMessageS
             </div>
 
             <div className="chatbox-messages">
-                {/* Connection Status */}
                 {!isConnected && (
                     <div className="connection-status">
                         🔄 Connecting to chat...
@@ -139,37 +171,39 @@ function Chatbox({ groupId, groupName, token, currentUserId, onClose, onMessageS
                     </div>
                 )}
 
-                {/* Loading History */}
                 {loadingHistory && (
                     <div className="connection-status">
                         📜 Loading messages...
                     </div>
                 )}
 
-                {/* Messages */}
-                {messages.map((msg) => {
-                    // 🔍 Debug logging
-                    console.log('Message comparison:', {
-                        messageId: msg.id,
-                        profileId: msg.profileId,
-                        profileIdType: typeof msg.profileId,
-                        currentUserId: currentUserId,
-                        currentUserIdType: typeof currentUserId,
-                        isMatch: msg.profileId === currentUserId,
-                        strictMatch: msg.profileId === currentUserId,
-                        username: msg.username
-                    });
+                {/* ✅ FIXED: Show empty state */}
+                {!loadingHistory && messages.length === 0 && (
+                    <div className="connection-status">
+                        No messages yet. Start the conversation!
+                    </div>
+                )}
 
-                    return (
-                        <ChatMessage
-                            key={msg.id}
-                            username={msg.username}
-                            messageText={msg.messageText}
-                            timestamp={msg.timestamp}
-                            isOwnMessage={msg.profileId === currentUserId}
-                        />
-                    );
-                })}
+                {/* Messages */}
+                {messages.map((msg) => (
+                    
+
+                    
+                    <ChatMessage
+                        key={msg.id}
+                        id={msg.id}
+                        username={msg.username}
+                        messageText={msg.messageText}
+                        timestamp={msg.timestamp}
+                        isOwnMessage={msg.profileId === currentUserId}
+                        readBy={msg.readBy}
+                        totalGroupMembers={totalGroupMembers}
+                        reactions={msg.reactions}
+                        currentUserId={currentUserId}
+                        onAddReaction={handleAddReaction}
+                    />
+
+                ))}
 
                 <div ref={messagesEndRef} />
             </div>

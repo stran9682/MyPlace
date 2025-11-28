@@ -4,6 +4,13 @@
     animation: slideIn 0.2s ease-out;
 }
 
+.read-receipt {
+    margin-left: 1px;
+    color: #4fc3f7;
+    font-weight: bold;
+    font-size: 12px;
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -26,7 +33,7 @@
     border-radius: 18px 18px 4px 18px;
     padding: 10px 15px;
     max-width: 70%;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.6);
 }
 
 /* Other people's messages - aligned left */
@@ -37,10 +44,10 @@
 .other-message .message-bubble {
     background-color: #d1a7a7;
     color: #212529;
-    border-radius: 18px 18px 18px 4px;
+    border-radius: 20px 20px 20px 2px;
     padding: 10px 15px;
     max-width: 70%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .message-username {
@@ -69,8 +76,10 @@
 
 .own-message .message-time {
     color: rgba(0, 0, 0, 0.8);
+    font-weight: 750;
 }
 
 .other-message .message-time {
-    color: rgba(126, 83, 143, 0.8);
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: 750;
 }

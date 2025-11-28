@@ -1,3 +1,7 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
 namespace DataLibrary;
 
 public class Message
@@ -16,4 +20,15 @@ public class Message
     
     // since retrieving the username EVERY time is a bit too much!
     public string Username { get; set; }  = null!;
+    
+    // ✅ Make sure these exist
+    public string? FileUrl { get; set; }
+    public string? FileName { get; set; }
+    
+    [JsonIgnore]
+    public virtual ICollection<MessageReaction> Reactions { get; set; } = new List<MessageReaction>();
+    
+    [JsonIgnore]
+    public virtual ICollection<MessageReadReceipt> ReadReceipts { get; set; } = new List<MessageReadReceipt>();
+    
 }

@@ -12,6 +12,7 @@
         <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="8.0.20" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+        <ProjectReference Include="..\DataLibrary\DataLibrary.csproj" />
     </ItemGroup>
 
     <ItemGroup>

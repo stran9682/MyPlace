@@ -6,7 +6,11 @@ namespace DataLibrary;
 
 public class ProfileContext : IdentityDbContext<Profile>
 {
+    
     public ProfileContext(DbContextOptions<ProfileContext> options) : base(options) { }
+    
+   
+    
     
     public DbSet<PictureModel> Pictures => Set<PictureModel>();
     
@@ -16,6 +20,10 @@ public class ProfileContext : IdentityDbContext<Profile>
     
     public DbSet<MatchRequest> Matches => Set<MatchRequest>();
 
+    public DbSet<Message> Message { get; set; }
+    public DbSet<MessageReaction> MessageReactions { get; set; }
+    
+    public DbSet<MessageReadReceipt> MessageReadReceipts { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -37,5 +45,7 @@ public class ProfileContext : IdentityDbContext<Profile>
             .HasConversion(
                 v => v.ToString(),
                 v => Enum.Parse<State>(v, true));
+        
+    
     }
 }
