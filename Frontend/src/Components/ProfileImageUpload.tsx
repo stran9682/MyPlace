@@ -37,7 +37,7 @@ export default function ProfileImageUpload() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('image/')) {
       setImage(file);
@@ -65,13 +65,13 @@ export default function ProfileImageUpload() {
 
     try {
       const token = Cookies.get('token');
-      
+
       const response = await fetch(`${apiUrl}/Picture/add-picture`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: formData
+        body: formData,
       });
 
       if (!response.ok) throw new Error('Upload failed');
@@ -80,7 +80,6 @@ export default function ProfileImageUpload() {
       console.log('Upload successful! Image URL:', imageUrl);
       alert('Profile image uploaded successfully!');
       setUploadProgress(100);
-      
     } catch (error) {
       console.error('Upload error:', error);
       alert('Upload failed. Please make sure you are logged in.');
@@ -92,24 +91,15 @@ export default function ProfileImageUpload() {
   return (
     <div className="upload-page">
       <div className="upload-card">
-        <h2 className="upload-title">
-          Upload Profile Image
-        </h2>
+        <h2 className="upload-title">Upload Profile Image</h2>
 
         <div className="upload-content">
           {/* Preview Area */}
           <div className="preview-container">
             {preview ? (
               <div className="preview-wrapper">
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="preview-image"
-                />
-                <button
-                  onClick={handleRemove}
-                  className="remove-button"
-                >
+                <img src={preview} alt="Preview" className="preview-image" />
+                <button onClick={handleRemove} className="remove-button">
                   <X size={16} />
                 </button>
               </div>
@@ -127,13 +117,8 @@ export default function ProfileImageUpload() {
             onDrop={handleDrop}
             className={`upload-zone ${isDragging ? 'dragging' : ''}`}
           >
-            <Upload
-              size={48}
-              className="upload-icon"
-            />
-            <p className="upload-text">
-              Drag and drop your image here, or
-            </p>
+            <Upload size={48} className="upload-icon" />
+            <p className="upload-text">Drag and drop your image here, or</p>
             <label>
               <input
                 type="file"
@@ -141,13 +126,9 @@ export default function ProfileImageUpload() {
                 onChange={handleFileChange}
                 className="file-input"
               />
-              <span className="browse-link">
-                browse files
-              </span>
+              <span className="browse-link">browse files</span>
             </label>
-            <p className="upload-hint">
-              PNG, JPG, GIF up to 10MB
-            </p>
+            <p className="upload-hint">PNG, JPG, GIF up to 10MB</p>
           </div>
 
           {/* File Info */}
@@ -155,12 +136,8 @@ export default function ProfileImageUpload() {
             <div className="file-info">
               <div className="file-details">
                 <div>
-                  <p className="file-name">
-                    {image.name}
-                  </p>
-                  <p className="file-size">
-                    {(image.size / 1024).toFixed(2)} KB
-                  </p>
+                  <p className="file-name">{image.name}</p>
+                  <p className="file-size">{(image.size / 1024).toFixed(2)} KB</p>
                 </div>
               </div>
             </div>
@@ -178,10 +155,7 @@ export default function ProfileImageUpload() {
           {/* Progress Bar */}
           {uploading && uploadProgress > 0 && (
             <div className="progress-container">
-              <div
-                className="progress-bar"
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
+              <div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div>
             </div>
           )}
         </div>

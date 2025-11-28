@@ -1,22 +1,23 @@
-﻿import axios, {AxiosHeaders} from 'axios'; // <-- Fix 1 applied here (type keyword)
+﻿import axios, { AxiosHeaders } from 'axios'
 import Cookies from 'js-cookie';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
-api.interceptors.request.use((config) => { // <-- Fix 2 applied here (removed explicit type)
-    const token = Cookies.get('token');
+api.interceptors.request.use((config) => {
 
-    if (token) {
-        // This logic ensures headers exist before adding Authorization
-        if (!config.headers) {
-            config.headers = new AxiosHeaders({});
-        }
-        config.headers.Authorization = `Bearer ${token}`;
+  const token = Cookies.get('token');
+
+  if (token) {
+   
+    if (!config.headers) {
+      config.headers = new AxiosHeaders({});
     }
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-    return config;
+  return config;
 });
 
 export default api;

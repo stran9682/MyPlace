@@ -1,7 +1,9 @@
-import Login from '../Components/Login'
+import Login from '../Components/Login';
 
 export const Loginpage = () => {
-    return <>
-        <Login />
-  </>
-}
+  return (
+    <>
+      <Login />
+    </>
+  );
+};
