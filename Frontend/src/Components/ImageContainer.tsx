@@ -22,7 +22,7 @@ export const ImageContainer = ({pictures} : { pictures : {fileName : string, id:
     
 
     return <div className="container">
-        <img src={`${imageUrl}/${pictures[index].fileName}`} alt="profile picture"/>
+        <img src={`${pictures[index].fileName}`} alt="profile picture"/>
 
         <div className="buttons">
             <a className="button" onClick={() => handleBackward()}></a>

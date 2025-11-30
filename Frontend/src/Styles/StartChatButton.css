@@ -1,0 +1,39 @@
+.start-chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.start-chat-btn {
+    padding: 12px 24px;
+    background-color: #5a1f58;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.start-chat-btn:hover:not(:disabled) {
+    background-color: #764ba2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(90, 31, 88, 0.3);
+}
+
+.start-chat-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.error-message {
+    color: #d32f2f;
+    font-size: 14px;
+    margin: 0;
+}

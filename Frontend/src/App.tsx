@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'
 import Header from './Components/Header'
 import Headermain from './Components/Header-main'
+import { Messagespage } from './pages/Messages-page'
 
 
 import './App.css' 
@@ -48,6 +49,7 @@ function App(): ReactElement {
           <Route path="/signup" element={<Signuppage/>} />
           <Route path="/matches" element={<Matchespage/>} />
           <Route path="/upload" element={<Profilepage/>} />
+            <Route path="/messages" element={<Messagespage/>} />
         </Routes>
       </main>
     </>

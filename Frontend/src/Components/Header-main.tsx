@@ -1,5 +1,4 @@
 import '../Styles/Headermain.css'
-import type { ReactElement } from 'react'
 import { Link } from 'react-router-dom'
 
 const Headermain = ({handleLogout} : {handleLogout : () => void}) => {
@@ -12,7 +11,7 @@ const Headermain = ({handleLogout} : {handleLogout : () => void}) => {
                     <Link to="/matches">Matches</Link>
                 </div>
                 <div>
-                    <Link to="/login">Messages</Link>
+                    <Link to="/messages">Messages</Link>
                 </div>
                 <div>
                     <Link to="/signup">Profile</Link>
