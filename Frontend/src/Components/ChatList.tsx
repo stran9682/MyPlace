@@ -1,10 +1,7 @@
 import {type ReactElement, useEffect, useState} from "react";
 import '../Styles/ChatList.css';
+import type { Group } from "../pages/Messages-page";
 
-type Group = {
-    id: number;
-    groupName: string;
-}
 
 const header = import.meta.env.VITE_API_URL
 
@@ -12,6 +9,27 @@ const header = import.meta.env.VITE_API_URL
 function ChatList({ onSelectChat } : {onSelectChat : (groupId: number) => void}): ReactElement {
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const formatTime = (timestamp: string) => {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+        if (diffInHours < 24) {
+            return date.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } else if (diffInHours < 168) {
+            return date.toLocaleDateString('en-US', { weekday: 'short' });
+        } else {
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    };
+
 
     useEffect(() => {
         const loadGroups = async () => {
@@ -69,6 +87,31 @@ function ChatList({ onSelectChat } : {onSelectChat : (groupId: number) => void})
                         >
                             <div className="chat-item-avatar">
                                 {group.groupName.charAt(0).toUpperCase()}
+                            </div>
+
+                             <div className="chat-item-content">
+                                <div className="chat-item-header">
+                                    <h3>{group.groupName}</h3>
+                                    {group.lastMessage && (
+                                        <span className="chat-item-time">
+                                            {formatTime(group.lastMessage.timestamp)}
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                {group.lastMessage ? (
+                                    <p className="chat-item-preview">
+                                        <span className="preview-username">
+                                            {group.lastMessage.username}:
+                                        </span>
+                                        {' '}
+                                        {group.lastMessage.messageText}
+                                    </p>
+                                ) : (
+                                    <p className="chat-item-preview no-messages">
+                                        No messages yet! Start the chat!
+                                    </p>
+                                )}
                             </div>
                         </div>
                     ))}

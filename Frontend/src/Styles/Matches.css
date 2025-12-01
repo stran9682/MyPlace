@@ -17,6 +17,7 @@
     /* border: 3px solid #a0a0a077; */
     width: 27%;
     overflow-y: scroll;
+    scrollbar-width: none;
 }
 
 .suggestion {

@@ -28,19 +28,39 @@ public class ChatHub : Hub
        {
            await Groups.AddToGroupAsync(Context.User.Identity.Name, group.ToString());
        }
+       
+       await base.OnConnectedAsync();
     }
 
-    public async Task SendMessage(Message message)
+    public async Task SendMessage(MessageDTO message, int groupId)
     {
-        await Clients.Group(message.GroupId.ToString()).SendAsync("ReceiveMessage", message);
+        // This is actually unbelievable. Absolutely never do this. 
+        // I made the mistake of using name for the id... now we suffer the consequences.
+        var username = _profileContext.Users
+            .Where(identity => identity.Id == Context.User.Identity.Name)
+            .Select(profile => profile.UserName)
+            .FirstOrDefault();
+
+        if (username == null) return;
+        
+        Message messageToSend = new Message()
+        {
+            GroupId = groupId,
+            MessageText = message.MessageText,
+            Timestamp = message.Timestamp,
+            ProfileId = Context.User.Identity.Name,
+            Username = username
+        };
+        
+        await Clients.Group(groupId.ToString()).SendAsync("ReceiveMessage", message);
 
         var group = _profileContext.Groups
             .Include(group => group.Messages)
-            .FirstOrDefault(group => group.Id == message.GroupId);
+            .FirstOrDefault(group => group.Id == groupId);
         
         if ( group is null ) return;
         
-        group.Messages.Add(message);
+        group.Messages.Add(messageToSend);
         
         await _profileContext.SaveChangesAsync();
     }

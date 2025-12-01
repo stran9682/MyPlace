@@ -3,6 +3,18 @@ import ChatList from '../Components/ChatList';
 import Chatbox from '../Components/Chatbox';
 import '../Styles/MessagesPage.css';
 
+export type Group = {
+    id: number;
+    groupName: string;
+    lastMessage: MessageDTO | null;
+}
+
+export type MessageDTO = {
+    username : string | null;
+    messageText : string;
+    timestamp : string;
+}
+
 export const Messagespage = () => {
     const [selectedChat, setSelectedChat] = useState<number | null>(null);
 
@@ -12,7 +24,7 @@ export const Messagespage = () => {
                 <ChatList onSelectChat={setSelectedChat}/>
 
                 { selectedChat != null ? 
-                    <Chatbox groupId={selectedChat}/> 
+                    <Chatbox key={selectedChat} groupId={selectedChat}/> 
                 :
                     <div className="no-chat-selected">
                         <div className="no-chat-content">

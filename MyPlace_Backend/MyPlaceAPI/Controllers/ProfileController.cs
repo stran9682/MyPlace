@@ -168,6 +168,7 @@ public class ProfileController : ControllerBase
             .Include(profile => profile.Attributes)
             .Include(profile => profile.IncomingMatchRequests)
             .Include(profile => profile.OutgoingMatchRequests)
+            .Include(profile => profile.IncomingMatchRequests)
             .ToListAsync();
 
         return profiles;
@@ -291,7 +292,7 @@ public class ProfileController : ControllerBase
         {
             _profileContext.Groups.Add(new Group()
             {
-                GroupName = $"{matchRequest.Receiver.UserName}-{matchRequest.Sender.UserName}",
+                GroupName = $"{matchRequest.Receiver.FirstName}-{matchRequest.Sender.LastName}",
                 Profiles = { matchRequest.Sender, matchRequest.Receiver } // BUT HE SCORES!!! getting the entire
                 // profile was useful after all
             });
@@ -329,8 +330,10 @@ public class ProfileController : ControllerBase
         return Ok();
     }
 
+    // gets people you have matched with
+    // intended for when you make a group!
     [Authorize]
-    [HttpPost("get-matches")]
+    [HttpGet("get-matches")]
     public async Task<IActionResult> GetMatches()
     {
         var userId = User.FindFirstValue(ClaimTypes.Name);
@@ -345,29 +348,83 @@ public class ProfileController : ControllerBase
         return Ok(accepts);
     }
 
+    // gets the groups you are a part of
+    // for displaying the chats your in
     [Authorize]
-    [HttpPost("get-groups")]
-    public async Task<ActionResult<List<Group>>> GetGroups()
+    [HttpGet("get-groups")]
+    public async Task<ActionResult<List<GroupDTO>>> GetGroups()
     {
         var userId = User.FindFirstValue(ClaimTypes.Name);
         if (userId is null) return Unauthorized();
+        
+        var user = await _userManager.Users
+            .Include(u => u.Groups)
+            .ThenInclude(g => g.Messages)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        
+        if (user is null) return Unauthorized();
 
-        var groups = await _userManager.Users
-            .Where(identity => identity.Id == userId)
-            .SelectMany(user => user.Groups).ToListAsync();
+        var groups = user.Groups
+            .Select(g => new GroupDTO
+            {
+                Id = g.Id,
+                GroupName = g.GroupName,
+                LastMessage = g.Messages
+                    .OrderByDescending(m => m.Timestamp)    // DAMN! all this just to get latest message...
+                                                                    // the work you make us do, better be grateful
+                    .Select(m => new MessageDTO
+                    {
+                        MessageText = m.MessageText,
+                        Timestamp = m.Timestamp,
+                        Username = m.Username
+                    })
+                    .FirstOrDefault()
+            })
+            .ToList();
 
         return groups;
     }
 
     [Authorize]
-    // [HttpPost("get-messages")]
-    // public async Task<ActionResult<List<Message>>> GetMessages()
-    // {
-    //     var userId = User.FindFirstValue(ClaimTypes.Name);
-    //     if (userId is null) return Unauthorized();
-    //     
-    //     
-    // }
+    [HttpGet("get-messages")]
+    public async Task<ActionResult<List<MessageDTO>>> GetMessages(int groupId, DateTime? before)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Name);
+        if (userId is null) return Unauthorized();
+
+        // nice try, idiot. 
+        var groupCheck = _userManager.Users
+            .Where(profile => profile.Id == userId)
+            .Select(profile => profile.Groups
+                .Where(group => group.Id == groupId));
+        
+        if (!groupCheck.Any()) return Unauthorized();
+        
+        var query =  _profileContext.Groups
+            .Where(group => group.Id == groupId)
+            .SelectMany(group => group.Messages
+                .AsQueryable());
+        
+        if (before is not null) // heh heh very smart right
+        {
+            query = query.Where(m => m.Timestamp < before.Value);
+        }
+        
+        var messages = await query
+            .OrderBy(m => m.Timestamp)
+            .Take(100)
+            .Select(m => new MessageDTO
+                {
+                    MessageText = m.MessageText,
+                    Timestamp = m.Timestamp,
+                    Username = m.Username
+                })
+            .ToListAsync();
+
+        messages.Reverse();
+        
+        return messages;
+    }
 
     [Authorize]
     [HttpPost("create-group")]
@@ -390,6 +447,7 @@ public class ProfileController : ControllerBase
         
         var group = new Group()
         {
+            GroupName = "New Group",
             Profiles = profiles,
         };
         
@@ -398,5 +456,43 @@ public class ProfileController : ControllerBase
         await _profileContext.SaveChangesAsync();
         
         return Ok(group);
+    }
+
+    [Authorize]
+    [HttpPost("test")]
+    public async Task<IActionResult> TestSend(MessageDTO message, int groupId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Name);
+        if (userId is null) return Unauthorized();
+        
+        // This is actually unbelievable. Absolutely never do this. 
+        // I made the mistake of using name for the id... now we suffer the consequences.
+        var username = _profileContext.Users
+            .Where(identity => identity.Id == userId)
+            .Select(profile => profile.UserName)
+            .FirstOrDefault();
+
+        if (username == null) return BadRequest(); 
+        
+        Message messageToSend = new Message()
+        {
+            GroupId = groupId,
+            MessageText = message.MessageText,
+            Timestamp = message.Timestamp,
+            ProfileId = userId,
+            Username = username
+        };
+        
+        var group = _profileContext.Groups
+            .Include(group => group.Messages)
+            .FirstOrDefault(group => group.Id == groupId);
+        
+        if ( group is null ) return BadRequest();
+        
+        group.Messages.Add(messageToSend);
+        
+        await _profileContext.SaveChangesAsync();
+        
+        return Ok();
     }
 }

@@ -78,7 +78,7 @@ const Matches = ({profile, handleNextProfile} : {profile : Profile, handleNextPr
                 key={profile.id}
             >
                 <div className='profile-block1' >
-                    <ImageContainer pictures={pictures}/>
+                    <ImageContainer pictures={profile.pictures}/>
 
                     <div>
                         <h1>{profile?.firstName} {profile?.lastName}</h1>
