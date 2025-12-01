@@ -4,11 +4,11 @@
     height: 600px;
     width: 100%;
     max-width: 400px;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
     overflow: hidden;
-    border: 2px solid rgba(0, 0, 0, 0.47);
+    border: none;
 }
 
 .chat-list-header {
@@ -16,14 +16,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    background-color: #000000;
+    background-color: #333;
     color: #ffffff;
 }
 
 .chat-list-header h2 {
     margin: 0;
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .refresh-btn {
@@ -51,12 +51,12 @@
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    color: #666;
+    color: #6b7280;
     text-align: center;
 }
 
 .chat-list-error {
-    color: #d32f2f;
+    color: #ef4444;
 }
 
 .chat-list-empty {
@@ -66,7 +66,7 @@
     justify-content: center;
     padding: 60px 20px;
     text-align: center;
-    color: #666;
+    color: #6b7280;
 }
 
 .chat-list-empty p {
@@ -76,13 +76,13 @@
 
 .empty-subtitle {
     font-size: 14px;
-    color: #999;
+    color: #9ca3af;
 }
 
 .chat-list-items {
     flex: 1;
     overflow-y: auto;
-    background-color: #f5f5f5;
+    background-color: white;
 }
 
 .chat-list-item {
@@ -90,13 +90,13 @@
     align-items: center;
     padding: 16px 20px;
     background-color: white;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e5e7eb;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
 .chat-list-item:hover {
-    background-color: #f9f9f9;
+    background-color: #f3f4f6;
 }
 
 .chat-item-avatar {
@@ -130,7 +130,7 @@
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: #333;
+    color: #1f2937;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -138,7 +138,7 @@
 
 .chat-item-time {
     font-size: 12px;
-    color: #999;
+    color: #9ca3af;
     flex-shrink: 0;
     margin-left: 12px;
 }
@@ -146,7 +146,7 @@
 .chat-item-preview {
     margin: 0;
     font-size: 14px;
-    color: #666;
+    color: #6b7280;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -154,11 +154,11 @@
 
 .preview-username {
     font-weight: 600;
-    color: #5a1f58;
+    color: #4f46e5;
 }
 
 .no-messages {
-    color: #999;
+    color: #9ca3af;
     font-style: italic;
 }
 
@@ -171,10 +171,10 @@
 }
 
 .chat-list-items::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #9ca3af;
     border-radius: 3px;
 }
 
 .chat-list-items::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #6b7280;
 }

@@ -1,17 +1,41 @@
 .messages-page {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding: 16px; 
 }
 
 .messages-content {
     flex: 1;
     display: flex;
-    gap: 20px;
-    padding: 30px;
+    gap: 24px; 
+    padding: 0; 
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
+}
+
+.chat-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 32px;
+    overflow: hidden; 
+}
+
+.chat-list {
+    flex: 0 0 300px; 
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+    padding: 0; 
+}
+
+.chat-window {
+    flex: 1; 
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 32px;
 }
 
 .no-chat-selected {
@@ -19,35 +43,39 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 16px;
-    border: 2px dashed #a0a0a077;
+    border-radius: 24px;
+    border: 2px dashed #9f9f9f; 
+    padding: 60px; 
 }
 
 .no-chat-content {
     text-align: center;
-    color: #666;
+    color: #4b5563;
 }
 
 .no-chat-content h2 {
     margin: 0 0 12px 0;
     font-size: 24px;
-    font-weight: 600;
-    color: #333;
+    font-weight: 700;
+    color: #1f2937; 
 }
 
 .no-chat-content p {
     margin: 0;
     font-size: 16px;
-    color: #999;
+    color: #6b7280; 
 }
 
 @media (max-width: 768px) {
     .messages-content {
         flex-direction: column;
-        padding: 20px;
+        gap: 16px;
+        padding: 0;
     }
-
+    .chat-list {
+        flex: 0 0 auto; 
+        width: 100%;
+    }
     .no-chat-selected {
         display: none;
     }
