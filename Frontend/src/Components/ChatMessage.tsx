@@ -1,14 +1,8 @@
+import type { MessageDTO } from '../pages/Messages-page';
 import '../Styles/ChatMessage.css';
-import type { ReactElement } from 'react';
 
-interface ChatMessageProps {
-    username: string;
-    messageText: string;
-    timestamp: string;
-    isOwnMessage: boolean;
-}
 
-function ChatMessage(): ReactElement {
+export const ChatMessage = ({message, isOwnMessage} : {message : MessageDTO, isOwnMessage : boolean}) => {
     const formatTime = (timestamp: string) => {
         const date = new Date(timestamp);
         return date.toLocaleTimeString('en-US', {
@@ -18,14 +12,12 @@ function ChatMessage(): ReactElement {
     };
 
     return (
-        <div className={`message ${true ? 'own-message' : 'other-message'}`}>
+        <div className={`message ${isOwnMessage ? 'own-message' : 'other-message'}`}>
             <div className="message-content">
-                {!true && <div className="message-username">username</div>}
-                <div className="message-text">messageText</div>
-                <div className="message-time">now</div>
+                {!true && <div className="message-username">{message.username}</div>}
+                <div className="message-text">{message.messageText}</div>
+                <div className="message-time">{formatTime(message.timestamp)}</div>
             </div>
         </div>
     );
 }
-
-export default ChatMessage;

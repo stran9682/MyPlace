@@ -46,8 +46,6 @@ const Login = ({setJwt} : {setJwt : (jwt : string) => void}) => {
                 const token = await response.text();
                 localStorage.setItem('jwtToken', token);
                 setJwt(token)
-
-                signalRService.StartConnection(token);
                 
                 navigate('/matches');
             } else {

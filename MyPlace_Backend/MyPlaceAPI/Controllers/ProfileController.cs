@@ -292,7 +292,7 @@ public class ProfileController : ControllerBase
         {
             _profileContext.Groups.Add(new Group()
             {
-                GroupName = $"{matchRequest.Receiver.FirstName}-{matchRequest.Sender.LastName}",
+                GroupName = $"{matchRequest.Receiver.FirstName}-{matchRequest.Sender.FirstName}",
                 Profiles = { matchRequest.Sender, matchRequest.Receiver } // BUT HE SCORES!!! getting the entire
                 // profile was useful after all
             });
@@ -420,8 +420,6 @@ public class ProfileController : ControllerBase
                     Username = m.Username
                 })
             .ToListAsync();
-
-        messages.Reverse();
         
         return messages;
     }
@@ -459,40 +457,17 @@ public class ProfileController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("test")]
-    public async Task<IActionResult> TestSend(MessageDTO message, int groupId)
+    [HttpGet("get-username")]
+    public async Task<ActionResult<string>> GetUsername()
     {
         var userId = User.FindFirstValue(ClaimTypes.Name);
         if (userId is null) return Unauthorized();
-        
-        // This is actually unbelievable. Absolutely never do this. 
-        // I made the mistake of using name for the id... now we suffer the consequences.
-        var username = _profileContext.Users
-            .Where(identity => identity.Id == userId)
-            .Select(profile => profile.UserName)
-            .FirstOrDefault();
 
-        if (username == null) return BadRequest(); 
+        var result = await _userManager.Users
+            .Where(profile => profile.Id == userId)
+            .Select(profile => profile.UserName)
+            .FirstOrDefaultAsync();
         
-        Message messageToSend = new Message()
-        {
-            GroupId = groupId,
-            MessageText = message.MessageText,
-            Timestamp = message.Timestamp,
-            ProfileId = userId,
-            Username = username
-        };
-        
-        var group = _profileContext.Groups
-            .Include(group => group.Messages)
-            .FirstOrDefault(group => group.Id == groupId);
-        
-        if ( group is null ) return BadRequest();
-        
-        group.Messages.Add(messageToSend);
-        
-        await _profileContext.SaveChangesAsync();
-        
-        return Ok();
+        return Ok(result);
     }
 }

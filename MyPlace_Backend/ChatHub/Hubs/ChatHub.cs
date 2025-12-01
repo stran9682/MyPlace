@@ -26,13 +26,13 @@ public class ChatHub : Hub
        
        foreach (var group in groupIds)
        {
-           await Groups.AddToGroupAsync(Context.User.Identity.Name, group.ToString());
+           await Groups.AddToGroupAsync(Context.ConnectionId, group.ToString());
        }
        
        await base.OnConnectedAsync();
     }
 
-    public async Task SendMessage(MessageDTO message, int groupId)
+    public async Task SendMessage(MessageDTO message)
     {
         // This is actually unbelievable. Absolutely never do this. 
         // I made the mistake of using name for the id... now we suffer the consequences.
@@ -45,18 +45,21 @@ public class ChatHub : Hub
         
         Message messageToSend = new Message()
         {
-            GroupId = groupId,
+            GroupId = message.GroupId,
             MessageText = message.MessageText,
             Timestamp = message.Timestamp,
             ProfileId = Context.User.Identity.Name,
             Username = username
         };
         
-        await Clients.Group(groupId.ToString()).SendAsync("ReceiveMessage", message);
+        message.Username = username;
+        
+        await Clients.Group(message.GroupId.ToString()).SendAsync("ReceiveMessage", message);
+        await Clients.Group(message.GroupId.ToString()).SendAsync("UpdateList", message);
 
         var group = _profileContext.Groups
             .Include(group => group.Messages)
-            .FirstOrDefault(group => group.Id == groupId);
+            .FirstOrDefault(group => group.Id == message.GroupId);
         
         if ( group is null ) return;
         

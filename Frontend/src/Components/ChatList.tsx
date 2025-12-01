@@ -1,12 +1,12 @@
 import {type ReactElement, useEffect, useState} from "react";
 import '../Styles/ChatList.css';
-import type { Group } from "../pages/Messages-page";
-
+import type { Group, MessageDTO } from "../pages/Messages-page";
+import signalRService from '../../services/SignalRService';
 
 const header = import.meta.env.VITE_API_URL
 
 
-function ChatList({ onSelectChat } : {onSelectChat : (groupId: number) => void}): ReactElement {
+function ChatList({ onSelectChat } : {onSelectChat : (groupId: number, groupName : string) => void}): ReactElement {
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -32,6 +32,18 @@ function ChatList({ onSelectChat } : {onSelectChat : (groupId: number) => void})
 
 
     useEffect(() => {
+        const updateItemById = (newMessage : MessageDTO) => {
+            console.log(newMessage)
+
+            setGroups(prev => prev.map(item => 
+                item.id === newMessage.groupId
+                    ? { ...item, lastMessage : newMessage }
+                    : item
+            )); 
+        };
+
+        signalRService.CreateEventListener("updatelist", updateItemById)
+
         const loadGroups = async () => {
             const response =  await fetch(header + `/Profile/get-groups`, {  
                 headers: {
@@ -52,6 +64,10 @@ function ChatList({ onSelectChat } : {onSelectChat : (groupId: number) => void})
         }
 
         loadGroups()
+
+        return () => {
+            signalRService.RemoveEventListener("updatelist")
+        }
     }, []);
 
 
@@ -83,7 +99,7 @@ function ChatList({ onSelectChat } : {onSelectChat : (groupId: number) => void})
                         <div
                             key={group.id}
                             className="chat-list-item"
-                            onClick={() => onSelectChat(group.id)}
+                            onClick={() => onSelectChat(group.id, group.groupName)}
                         >
                             <div className="chat-item-avatar">
                                 {group.groupName.charAt(0).toUpperCase()}
