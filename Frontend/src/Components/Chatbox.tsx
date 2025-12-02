@@ -8,7 +8,7 @@ import signalRService from '../../services/SignalRService';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-function Chatbox({groupId, username, chatname} : {groupId : number, username : string, chatname : string}): ReactElement {
+function Chatbox({groupId, chatname} : {groupId : number, chatname : string}): ReactElement {
     const [messageInput, setMessageInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [messages, setMessages] = useState<MessageDTO[]>([]);
@@ -35,7 +35,7 @@ function Chatbox({groupId, username, chatname} : {groupId : number, username : s
     };
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth',  block: 'nearest', inline: 'start' });
     };
 
     const handleSendMessage = async (e: React.FormEvent) => {
@@ -54,13 +54,13 @@ function Chatbox({groupId, username, chatname} : {groupId : number, username : s
     };
 
     useEffect(() => {
-        loadMessageHistory()
-
         const handleReceiveMessage = (message : MessageDTO) => {
             setMessages(prev => [...prev, message])
         }
 
         signalRService.CreateEventListener("receivemessage", handleReceiveMessage)
+
+        loadMessageHistory()
 
         return () => {
             signalRService.RemoveEventListener("receivemessage")
@@ -68,8 +68,8 @@ function Chatbox({groupId, username, chatname} : {groupId : number, username : s
     }, [])
 
     useEffect(() => {
-
-    }, [messages]);
+        scrollToBottom()
+    }, [messages])
 
     return (
         <div className="chatbox-container">
@@ -83,7 +83,7 @@ function Chatbox({groupId, username, chatname} : {groupId : number, username : s
                     messages.length === 0 ?<div className="connection-status">Connecting...</div> 
                 : 
                     messages.map((msg, index) => (
-                        <ChatMessage message={msg} key={index} isOwnMessage={username === msg.username}/>
+                        <ChatMessage message={msg} key={index}/>
                     ))
                 }
                 <div ref={messagesEndRef}/>

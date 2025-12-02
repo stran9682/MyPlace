@@ -32,7 +32,7 @@ public class PictureController : Controller
     [HttpPost("add-picture")]
     public async Task<IActionResult> AddPicture(IFormFile file)
     {
-        var id = User.FindFirstValue(ClaimTypes.Name);
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (id is null) return Unauthorized();
         
         //  save to postgres first

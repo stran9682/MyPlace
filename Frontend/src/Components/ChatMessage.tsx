@@ -1,8 +1,9 @@
+import { jwtDecode } from 'jwt-decode';
 import type { MessageDTO } from '../pages/Messages-page';
 import '../Styles/ChatMessage.css';
 
 
-export const ChatMessage = ({message, isOwnMessage} : {message : MessageDTO, isOwnMessage : boolean}) => {
+export const ChatMessage = ({message} : {message : MessageDTO}) => {
     const formatTime = (timestamp: string) => {
         const date = new Date(timestamp);
         return date.toLocaleTimeString('en-US', {
@@ -11,8 +12,11 @@ export const ChatMessage = ({message, isOwnMessage} : {message : MessageDTO, isO
         });
     };
 
+    const token = jwtDecode(localStorage.getItem("jwtToken")!) as Record<string, string>
+    const username = token["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
+
     return (
-        <div className={`message ${isOwnMessage ? 'own-message' : 'other-message'}`}>
+        <div className={`message ${message.username === username ? 'own-message' : 'other-message'}`}>
             <div className="message-content">
                 {!true && <div className="message-username">{message.username}</div>}
                 <div className="message-text">{message.messageText}</div>

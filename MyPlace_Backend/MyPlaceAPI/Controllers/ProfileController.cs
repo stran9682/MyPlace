@@ -92,7 +92,7 @@ public class ProfileController : ControllerBase
     [HttpPost("updateprofile")]
     public async Task<ActionResult<ProfileAttributes>> UpdateProfile([FromBody] AttributeDTO attribute)
     {
-        var id = User.FindFirstValue(ClaimTypes.Name);
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (id is null) return Unauthorized();
 
         var profile = await _userManager.Users
@@ -139,7 +139,8 @@ public class ProfileController : ControllerBase
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, profile.Id),
+            new(ClaimTypes.NameIdentifier, profile.Id) ,
+            new(ClaimTypes.Name, profile.UserName)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]!));
@@ -181,7 +182,7 @@ public class ProfileController : ControllerBase
     [HttpGet("get-recommendations")]
     public async Task<ActionResult<List<string>>> GetRecommendations()
     {
-        var id = User.FindFirstValue(ClaimTypes.Name);
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (id is null) return Unauthorized();
 
         // Get yo profile
@@ -229,7 +230,7 @@ public class ProfileController : ControllerBase
     [HttpGet("get-public-profile")]
     public async Task<ActionResult<ProfileOutDTO>> GetProfileById(string userId)
     {
-        var personalId = User.FindFirstValue(ClaimTypes.Name);
+        var personalId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (personalId is null) return Unauthorized();
 
         // we're going to need a lot of data here...
@@ -264,7 +265,7 @@ public class ProfileController : ControllerBase
     [HttpPost("send-request")]
     public async Task<IActionResult> SendRequest(string receiverId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
 
         // request to you already exists
@@ -314,7 +315,7 @@ public class ProfileController : ControllerBase
     [HttpPost("reject-request")]
     public async Task<IActionResult> RejectRequest(string receiverId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
 
         // request to you already exists
@@ -336,7 +337,7 @@ public class ProfileController : ControllerBase
     [HttpGet("get-matches")]
     public async Task<IActionResult> GetMatches()
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
 
         var accepts = await _profileContext.Matches
@@ -354,7 +355,7 @@ public class ProfileController : ControllerBase
     [HttpGet("get-groups")]
     public async Task<ActionResult<List<GroupDTO>>> GetGroups()
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
         
         var user = await _userManager.Users
@@ -389,7 +390,7 @@ public class ProfileController : ControllerBase
     [HttpGet("get-messages")]
     public async Task<ActionResult<List<MessageDTO>>> GetMessages(int groupId, DateTime? before)
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
 
         // nice try, idiot. 
@@ -428,7 +429,7 @@ public class ProfileController : ControllerBase
     [HttpPost("create-group")]
     public async Task<IActionResult> CreateGroup(List<string> userIds)
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
         
         var accepts = await _profileContext.Matches
@@ -460,7 +461,7 @@ public class ProfileController : ControllerBase
     [HttpGet("get-username")]
     public async Task<ActionResult<string>> GetUsername()
     {
-        var userId = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
 
         var result = await _userManager.Users

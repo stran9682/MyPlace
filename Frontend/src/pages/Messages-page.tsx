@@ -21,7 +21,6 @@ export type MessageDTO = {
 
 export const Messagespage = () => {
     const [selectedChat, setSelectedChat] = useState<number | null>(null);
-    const [username, setUsername] = useState("")
     const [chatname, setChatname] = useState("")
 
     const handleSelectChat = (groupId: number, groupName : string) => {
@@ -38,26 +37,6 @@ export const Messagespage = () => {
             } 
 
             await signalRService.StartConnection(token);
-
-
-            try {
-                const response = await fetch(`${header}/Profile/get-username`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Something went wrong... ${response.status}`)
-                }
-
-                const result = await response.text();
-
-                setUsername(result)
-
-            } catch (err) {
-                console.error('Failed to load message history:', err);
-            }
         }
 
         handleSetup()
@@ -68,8 +47,8 @@ export const Messagespage = () => {
             <div className="messages-content">
                 <ChatList onSelectChat={handleSelectChat}/>
 
-                { selectedChat != null && username !== "" ? 
-                    <Chatbox key={selectedChat} groupId={selectedChat} username={username}  chatname={chatname}/> 
+                { selectedChat != null ? 
+                    <Chatbox key={selectedChat} groupId={selectedChat} chatname={chatname}/> 
                 :
                     <div className="no-chat-selected">
                         <div className="no-chat-content">

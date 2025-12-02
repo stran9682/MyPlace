@@ -42,8 +42,6 @@ function ChatList({ onSelectChat } : {onSelectChat : (groupId: number, groupName
             )); 
         };
 
-        signalRService.CreateEventListener("updatelist", updateItemById)
-
         const loadGroups = async () => {
             const response =  await fetch(header + `/Profile/get-groups`, {  
                 headers: {
@@ -61,9 +59,12 @@ function ChatList({ onSelectChat } : {onSelectChat : (groupId: number, groupName
             const groups = await response.json()
             setGroups(groups)
             setLoading(false);
+
+
+            signalRService.CreateEventListener("updatelist", updateItemById)
         }
 
-        loadGroups()
+        loadGroups()        
 
         return () => {
             signalRService.RemoveEventListener("updatelist")
