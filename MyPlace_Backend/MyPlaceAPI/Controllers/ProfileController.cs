@@ -261,6 +261,19 @@ public class ProfileController : ControllerBase
         return profileOutDto;
     }
 
+    [HttpGet("get-pfp-url")]
+    public async Task<ActionResult<string>> GetPfpUrl(string userId)
+    {
+        PictureModel? picture = await  _userManager.Users.Where(profile => profile.Id == userId)
+            .SelectMany(profile => profile.Pictures)
+            .OrderBy(picture => picture.Id)
+            .FirstOrDefaultAsync();
+        
+        if (picture is null) return BadRequest();
+
+        return $"{picture.FileName}";
+    }
+
     [Authorize]
     [HttpPost("send-request")]
     public async Task<IActionResult> SendRequest(string receiverId)
@@ -360,7 +373,9 @@ public class ProfileController : ControllerBase
         
         var user = await _userManager.Users
             .Include(u => u.Groups)
-            .ThenInclude(g => g.Messages)
+                .ThenInclude(g => g.Messages)
+            .Include(u => u.Groups)
+                .ThenInclude(g => g.Profiles)
             .FirstOrDefaultAsync(u => u.Id == userId);
         
         if (user is null) return Unauthorized();
@@ -368,6 +383,7 @@ public class ProfileController : ControllerBase
         var groups = user.Groups
             .Select(g => new GroupDTO
             {
+                ProfileIds = g.Profiles.Select(p => p.Id).ToList(),
                 Id = g.Id,
                 GroupName = g.GroupName,
                 LastMessage = g.Messages
@@ -377,7 +393,9 @@ public class ProfileController : ControllerBase
                     {
                         MessageText = m.MessageText,
                         Timestamp = m.Timestamp,
-                        Username = m.Username
+                        Username = m.Username,
+                        Id = m.ProfileId,
+                        GroupId = m.GroupId
                     })
                     .FirstOrDefault()
             })
@@ -416,9 +434,11 @@ public class ProfileController : ControllerBase
             .Take(100)
             .Select(m => new MessageDTO
                 {
+                    GroupId = m.GroupId,
                     MessageText = m.MessageText,
                     Timestamp = m.Timestamp,
-                    Username = m.Username
+                    Username = m.Username,
+                    Id = m.ProfileId
                 })
             .ToListAsync();
         
@@ -458,17 +478,55 @@ public class ProfileController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("get-username")]
-    public async Task<ActionResult<string>> GetUsername()
+    [HttpPost("add-to-group")]
+    public async Task<IActionResult> AddToGroup(int groupId, string userToAddId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
-
-        var result = await _userManager.Users
-            .Where(profile => profile.Id == userId)
-            .Select(profile => profile.UserName)
-            .FirstOrDefaultAsync();
         
-        return Ok(result);
-    }
+        // find the group and make sure you are actually a part of it. Nice try weirdo
+        Group? group = await _profileContext.Groups
+            .Include(p => p.Profiles)
+            .FirstOrDefaultAsync(group => 
+                group.Id == groupId && 
+                group.Profiles.Any(profile => profile.Id == userId));
+        
+        if (group is null) return Unauthorized();
+        
+        Profile? userToAdd = _userManager.Users.FirstOrDefault(u => 
+            u.Id == userToAddId &&
+            
+            // The person you are trying to add is actually a person you've matched with. NO WEIRDOS!
+            (
+                u.IncomingMatchRequests.Any(mr => mr.SenderId == userId && mr.State == State.Accepted) ||
+                u.OutgoingMatchRequests.Any(mr => mr.ReceiverId == userId && mr.State == State.Accepted)
+            )
+        );
+        
+        if (userToAdd is null) return Unauthorized();
+        
+        group.Profiles.Add(userToAdd);
+        await _profileContext.SaveChangesAsync();
+
+        GroupDTO dto = new GroupDTO
+        {
+            GroupName = group.GroupName,
+            ProfileIds = group.Profiles.Select(p => p.Id).ToList(),
+            Id = group.Id,
+            LastMessage = group.Messages
+                .OrderByDescending(m => m.Timestamp) // DAMN! all this just to get latest message...
+                // the work you make us do, better be grateful
+                .Select(m => new MessageDTO
+                {
+                    MessageText = m.MessageText,
+                    Timestamp = m.Timestamp,
+                    Username = m.Username,
+                    Id = m.ProfileId,
+                    GroupId = m.GroupId
+                })
+                .FirstOrDefault()
+        };
+        
+        return Ok(dto);
+    } 
 }

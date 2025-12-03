@@ -34,14 +34,11 @@ public class ChatHub : Hub
 
     public async Task SendMessage(MessageDTO message)
     {
-        // This is actually unbelievable. Absolutely never do this. 
-        // I made the mistake of using name for the id... now we suffer the consequences.
-        var username = _profileContext.Users
-            .Where(identity => identity.Id == Context.UserIdentifier)
-            .Select(profile => profile.UserName)
-            .FirstOrDefault();
-
-        if (username == null) return;
+        message.Id = Context.UserIdentifier;
+        message.Username = Context.User.Identity.Name;
+        
+        await Clients.Group(message.GroupId.ToString()).SendAsync("ReceiveMessage", message);
+        await Clients.Group(message.GroupId.ToString()).SendAsync("UpdateList", message);
         
         Message messageToSend = new Message()
         {
@@ -49,13 +46,8 @@ public class ChatHub : Hub
             MessageText = message.MessageText,
             Timestamp = message.Timestamp,
             ProfileId = Context.UserIdentifier,
-            Username = username
+            Username = Context.User.Identity.Name,
         };
-        
-        message.Username = username;
-        
-        await Clients.Group(message.GroupId.ToString()).SendAsync("ReceiveMessage", message);
-        await Clients.Group(message.GroupId.ToString()).SendAsync("UpdateList", message);
 
         var group = _profileContext.Groups
             .Include(group => group.Messages)

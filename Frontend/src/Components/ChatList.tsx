@@ -6,7 +6,7 @@ import signalRService from '../../services/SignalRService';
 const header = import.meta.env.VITE_API_URL
 
 
-function ChatList({ onSelectChat } : {onSelectChat : (groupId: number, groupName : string) => void}): ReactElement {
+function ChatList({ onSelectChat } : {onSelectChat : (group : Group) => void}): ReactElement {
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -100,7 +100,7 @@ function ChatList({ onSelectChat } : {onSelectChat : (groupId: number, groupName
                         <div
                             key={group.id}
                             className="chat-list-item"
-                            onClick={() => onSelectChat(group.id, group.groupName)}
+                            onClick={() => onSelectChat(group)}
                         >
                             <div className="chat-item-avatar">
                                 {group.groupName.charAt(0).toUpperCase()}

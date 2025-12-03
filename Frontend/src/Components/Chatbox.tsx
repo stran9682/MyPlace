@@ -2,21 +2,24 @@ import '../Styles/Chatbox.css';
 import { useState, useEffect, useRef } from 'react';
 import type { ReactElement } from 'react';
 import { ChatMessage } from './ChatMessage';
-import type { MessageDTO } from '../pages/Messages-page';
+import type { Group, MessageDTO } from '../pages/Messages-page';
 import signalRService from '../../services/SignalRService';
+import { jwtDecode } from 'jwt-decode';
+import { AddFriendsMenu } from './AddFriendsMenu';
 
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-function Chatbox({groupId, chatname} : {groupId : number, chatname : string}): ReactElement {
+function Chatbox({group} : {group: Group}): ReactElement {
     const [messageInput, setMessageInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [messages, setMessages] = useState<MessageDTO[]>([]);
+    const [openAddMenu, setOpenAddMenu] = useState(false)
 
 
     const loadMessageHistory = async () => {
         try {
-            const response = await fetch(`${API_URL}/Profile/get-messages/?groupId=${groupId}`, {
+            const response = await fetch(`${API_URL}/Profile/get-messages/?groupId=${group.id}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
                 }
@@ -40,12 +43,16 @@ function Chatbox({groupId, chatname} : {groupId : number, chatname : string}): R
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        const token = jwtDecode(localStorage.getItem("jwtToken")!) as Record<string, string>
+
         if (messageInput.trim()) {
             const dto : MessageDTO = {
-                username: null,
+                username: token["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+                id: token["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
                 messageText: messageInput,
                 timestamp: new Date().toISOString(),
-                groupId : groupId
+                groupId : group.id,
             }
 
             await signalRService.Invoke("SendMessage", dto)
@@ -54,6 +61,7 @@ function Chatbox({groupId, chatname} : {groupId : number, chatname : string}): R
     };
 
     useEffect(() => {
+
         const handleReceiveMessage = (message : MessageDTO) => {
             setMessages(prev => [...prev, message])
         }
@@ -74,13 +82,15 @@ function Chatbox({groupId, chatname} : {groupId : number, chatname : string}): R
     return (
         <div className="chatbox-container">
             <div className="chatbox-header">
-                <h2>{chatname}</h2>
-                <button className="close-btn" onClick={() => null}>×</button>
+                <h2>{group.groupName}</h2>
+                <button onClick={() => setOpenAddMenu(true)} disabled={openAddMenu}>+</button>
             </div>
+
+            {openAddMenu && <AddFriendsMenu setOpenAddMenu={setOpenAddMenu} group={group}/>}
 
             <div className="chatbox-messages">
                 { 
-                    messages.length === 0 ?<div className="connection-status">Connecting...</div> 
+                    messages.length === 0 ? <div className="connection-status">Start The Chat!...</div> 
                 : 
                     messages.map((msg, index) => (
                         <ChatMessage message={msg} key={index}/>

@@ -4,29 +4,25 @@ import Chatbox from '../Components/Chatbox';
 import '../Styles/MessagesPage.css';
 import signalRService from '../../services/SignalRService';
 
-const header = import.meta.env.VITE_API_URL
 
 export type Group = {
     id: number;
     groupName: string;
     lastMessage: MessageDTO | null;
+    profileIds: string[]
 }
 
 export type MessageDTO = {
-    username : string | null;
+    username : string;
     messageText : string;
     timestamp : string;
-    groupId : number
+    groupId : number;
+    id: string
 }
 
 export const Messagespage = () => {
-    const [selectedChat, setSelectedChat] = useState<number | null>(null);
-    const [chatname, setChatname] = useState("")
+    const [selectedChat, setSelectedChat] = useState<Group | null>(null);
 
-    const handleSelectChat = (groupId: number, groupName : string) => {
-        setSelectedChat(groupId)
-        setChatname(groupName)
-    }
 
     useEffect(() => {
         const handleSetup = async () => {
@@ -45,10 +41,10 @@ export const Messagespage = () => {
     return (
         <div className="messages-page">
             <div className="messages-content">
-                <ChatList onSelectChat={handleSelectChat}/>
+                <ChatList onSelectChat={setSelectedChat}/>
 
                 { selectedChat != null ? 
-                    <Chatbox key={selectedChat} groupId={selectedChat} chatname={chatname}/> 
+                    <Chatbox key={selectedChat.id} group={selectedChat}/> 
                 :
                     <div className="no-chat-selected">
                         <div className="no-chat-content">
