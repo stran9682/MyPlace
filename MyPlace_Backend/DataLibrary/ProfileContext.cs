@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,15 +22,19 @@ public class ProfileContext : IdentityDbContext<Profile>
         
         modelBuilder.Entity<MatchRequest>()
             .HasOne(mr => mr.Sender)
-            .WithMany(profile => profile.MatchRequests)
+            .WithMany(profile => profile.OutgoingMatchRequests)
             .HasForeignKey(mr => mr.SenderId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<MatchRequest>()
             .HasOne(mr => mr.Receiver)
-            .WithMany()
+            .WithMany(profile => profile.IncomingMatchRequests)
             .HasForeignKey(mr => mr.ReceiverId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<MatchRequest>()
+            .HasIndex(index => new { index.SenderId, index.ReceiverId })
+            .IsUnique();
         
         modelBuilder.Entity<MatchRequest>()
             .Property(e => e.State)

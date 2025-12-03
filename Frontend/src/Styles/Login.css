@@ -2,13 +2,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 87vh;
     padding: 0px;
     overflow: hidden;
 }
 
 .login-box {
-    background-color: rgba(255, 255, 255, 0.361);
+    background-color: rgba(255, 255, 255, 0.82);
     padding: 50px 40px;
     border-radius: 24px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);

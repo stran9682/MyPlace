@@ -10,9 +10,14 @@ services:
     networks:
       - connections
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persist data
+      - postgres_data:/var/lib/postgresql  # Persist data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d profiles"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:latest
@@ -31,6 +36,7 @@ services:
       - redis
     environment:
       - ConnectionStrings__Redis=redis:6379
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
     networks:
       - connections
     ports:
@@ -58,13 +64,17 @@ services:
       dockerfile: MigrationApplication/Dockerfile
     container_name: migrator
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=profiles;User ID=myuser;Password=mypassword;
+      - ElasticSettings__Url=http://elasticsearch:9200
+      - ElasticSettings__DefaultIndex=profile_attributes
     networks:
       - connections
     ports:
       - "5025:8080"
+    restart: on-failure
   
   elasticsearch:
     container_name: els
@@ -74,23 +84,12 @@ services:
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
       - xpack.security.enabled=false
     networks:
       - connections
     
-  kibana: 
-    container_name: kibana
-    image: kibana:9.2.1
-    ports: 
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    networks:
-      - connections
-  
   minio:
     container_name: minio
     image: minio/minio

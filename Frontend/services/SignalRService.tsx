@@ -1,5 +1,8 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
+ const header = import.meta.env.VITE_CHATHUB_URL
+
+
 class SignalRService {
 
     private static _instance: SignalRService | undefined;
@@ -14,18 +17,16 @@ class SignalRService {
         }
 
         SignalRService._instance = this;
+    }
 
+    async StartConnection (token : string) {
         try {
-            const header = import.meta.env.VITE_CHATHUB_URL
-
             this.conn = new HubConnectionBuilder()
-                .withUrl(header
-                //     , {
-                //     accessTokenFactory: () => {
-                //         return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiN2Q4M2JjYjItNWMwZi00NDU4LTk0NjQtMjM1YTRkYWM0ODFkIiwiZXhwIjoxNzYxNTAyMTQ4LCJpc3MiOiJJc3N1ZXIiLCJhdWQiOiJBdWRpZW5jZSJ9.nqk0wz5JzoT4Y_Hy1nJKd0FgPxrxI4JeoDXhECBIIJY"
-                //     }
-                // }
-                )
+                .withUrl(header, {
+                    accessTokenFactory: () => {
+                        return token
+                    }
+            })
                 .configureLogging(LogLevel.Information)
                 .withAutomaticReconnect([0, 2000, 10000, 30000])
                 .build();
@@ -33,9 +34,7 @@ class SignalRService {
         catch (e){
             console.log(e)
         }
-    }
 
-    async StartConnection () {
         await this.conn?.start();
     }
     

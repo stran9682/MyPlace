@@ -16,4 +16,6 @@ public class ProfileAttributes
     public int Personality { get; set; }
     public int HoursAwake { get; set; }
     public string Gender { get; set; } = string.Empty; 
+    
+    public float [] TraitVector { get; set; }  = null!;
 }

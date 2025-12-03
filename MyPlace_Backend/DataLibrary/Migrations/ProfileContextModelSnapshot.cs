@@ -63,7 +63,8 @@ namespace DataLibrary.Migrations
 
                     b.HasIndex("ReceiverId");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("SenderId", "ReceiverId")
+                        .IsUnique();
 
                     b.ToTable("Matches");
                 });
@@ -231,6 +232,10 @@ namespace DataLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.PrimitiveCollection<float[]>("TraitVector")
+                        .IsRequired()
+                        .HasColumnType("real[]");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProfileId")
@@ -389,13 +394,13 @@ namespace DataLibrary.Migrations
             modelBuilder.Entity("DataLibrary.MatchRequest", b =>
                 {
                     b.HasOne("DataLibrary.Profile", "Receiver")
-                        .WithMany()
+                        .WithMany("IncomingMatchRequests")
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DataLibrary.Profile", "Sender")
-                        .WithMany("MatchRequests")
+                        .WithMany("OutgoingMatchRequests")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -517,7 +522,9 @@ namespace DataLibrary.Migrations
                 {
                     b.Navigation("Attributes");
 
-                    b.Navigation("MatchRequests");
+                    b.Navigation("IncomingMatchRequests");
+
+                    b.Navigation("OutgoingMatchRequests");
 
                     b.Navigation("Pictures");
                 });

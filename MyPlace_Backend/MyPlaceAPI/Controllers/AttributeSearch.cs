@@ -15,24 +15,10 @@ public class AttributeSearch : ControllerBase
         _elasticService = elasticService;
     }
     
-    [HttpPost("create-index")]
-    public async Task<IActionResult> CreateIndex(string indexName)
-    {
-        await _elasticService.CreateIndex(indexName);
-        return Ok();
-    }
-
-    [HttpPost("add-user")]
-    public async Task<IActionResult> AddProfileAttributes([FromBody] ProfileAttributes profileAttributes)
-    {
-        var result = await  _elasticService.AddOrUpdate(profileAttributes);
-        return result ? Ok() : BadRequest();
-    }
-
     [HttpGet("get-user")]
-    public async Task<IActionResult> GetProfileAttributes(string key)
+    public async Task<IActionResult> GetProfileAttributes(ProfileAttributes attributes)
     {
-        var user = await _elasticService.GetAttributes(key);
+        var user = await _elasticService.GetSimilarAttributes(attributes);
         return user != null ? Ok(user) : NotFound();
     }
 

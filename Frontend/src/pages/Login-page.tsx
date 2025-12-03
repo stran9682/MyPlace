@@ -1,7 +1,7 @@
 import Login from '../Components/Login'
 
-export const Loginpage = () => {
+export const Loginpage = ({setJwt} : {setJwt : (jwt : string) => void}) => {
     return <>
-        <Login />
+        <Login setJwt={setJwt}/>
   </>
 }

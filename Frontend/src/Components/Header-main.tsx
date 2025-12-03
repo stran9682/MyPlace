@@ -1,24 +1,35 @@
-import '../Styles/Headermain.css'
-import type { ReactElement } from 'react'
-import { Link } from 'react-router-dom'
+import '../Styles/Header.css'
+import { Link, useLocation } from 'react-router-dom'
 
-function Headermain(): ReactElement {
+const Headermain = ({handleLogout} : {handleLogout : () => void}) => {
+        const location = useLocation();
 
+        const getWrapperClass = (path: string): string => {
+            if (location.pathname === path) {
+                return 'active-nav-btn';
+            }
+            return 'nav-item';
+        };
+        
     return (
-        <header className="header">
-            <div className="logo">MyPlace</div>
-            <nav className="settings">
-                <div className="matches-navbtn">
-                    <Link to="/matches">MATCHES</Link>
-                </div>
-                <div>
-                    <Link to="/login">MESSAGES</Link>
-                </div>
-                <div>
-                    <Link to="/signup">PROFILE</Link>
-                </div>
-            </nav>
-        </header>
+        <div className="header-bg">
+            <header className="header">
+                <Link to="/" className="logo">MyPlace</Link>
+                <nav className="nav">
+                    <div className={getWrapperClass("/matches")}>
+                        <Link to="/matches">Matches</Link>
+                    </div>
+                    <div className={getWrapperClass("/messages")}>
+                        <Link to="/messages">Messages</Link>
+                    </div>
+                    <div className={getWrapperClass("/profile")}>
+                        <Link to="/profile">Profile</Link>
+                    </div>
+
+                    <div onClick={handleLogout} className="logout-text">Log out</div>
+                </nav>
+            </header>
+        </div>
     );
 }
 
