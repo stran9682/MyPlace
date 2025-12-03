@@ -1,18 +1,18 @@
 import '../Styles/Header.css'
-import type { ReactElement } from 'react'
 import { Link } from 'react-router-dom'
 
-function Header(): ReactElement {
-
+function Header() { 
     return (
-        <header className="header">
-            <Link to="/" className="logo">MyPlace</Link>
-            <nav className="nav">
-                <div className='login-btn-container'>
-                    <Link to="/login">Log in</Link>
-                </div>
-            </nav>
-        </header>
+        <div className="header-bg">
+            <header className="header">
+                <Link to="/" className="logo">MyPlace</Link>
+                <nav className="nav">
+                    <div className='active-nav-btn'>
+                        <Link to="/login">Log in</Link>
+                    </div>
+                </nav>
+            </header>
+        </div>
     );
 }
 

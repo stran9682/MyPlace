@@ -8,7 +8,7 @@
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    border: 2px solid #a0a0a077;
+    border: none;
 }
 
 .chatbox-header {
@@ -16,14 +16,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    background-color: #2a2a2a;
+    background-color: #1f2937;
     color: white;
 }
 
 .chatbox-header h2 {
     margin: 0;
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 
@@ -41,7 +41,7 @@
 .connection-status {
     text-align: center;
     padding: 10px;
-    color: #666;
+    color: #6b7280;
     font-size: 14px;
 }
 
@@ -50,13 +50,13 @@
     gap: 10px;
     padding: 16px;
     background-color: white;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #e5e7eb;
 }
 
 .chatbox-input input {
     flex: 1;
     padding: 12px 16px;
-    border: 2px solid #e5e5e5;
+    border: 1px solid #d1d5db; 
     border-radius: 24px;
     font-size: 14px;
     outline: none;
@@ -64,17 +64,17 @@
 }
 
 .chatbox-input input:focus {
-    border-color: #5a1f58;
+    border-color: #4f46e5;
 }
 
 .chatbox-input input:disabled {
-    background-color: #f0f0f0;
+    background-color: #f3f4f6;
     cursor: not-allowed;
 }
 
 .chatbox-input button {
     padding: 12px 24px;
-    background-color: #2a2a2a;
+    background-color: #5a1f58;
     color: white;
     border: none;
     border-radius: 24px;
@@ -85,7 +85,7 @@
 }
 
 .chatbox-input button:hover:not(:disabled) {
-    background-color: #3a3a3a;
+    background-color: #764ba2;
     transform: translateY(-1px);
 }
 
@@ -104,7 +104,7 @@
 }
 
 .chatbox-messages::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #9ca3af;
     border-radius: 3px;
 }
 
