@@ -3,7 +3,7 @@ import { Upload, X, User } from 'lucide-react';
 import Cookies from 'js-cookie';
 import '../Styles/ProfileImageUpload.css';
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_UPLOAD_API;
 
 export default function ProfileImageUpload() {
   const [image, setImage] = useState<File | null>(null);
@@ -66,7 +66,7 @@ export default function ProfileImageUpload() {
     try {
       const token = Cookies.get('token');
       
-      const response = await fetch(`${apiUrl}/Picture/add-picture`, {
+      const response = await fetch(`${apiUrl}/add-picture`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

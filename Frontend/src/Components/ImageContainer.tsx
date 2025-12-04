@@ -22,7 +22,7 @@ export const ImageContainer = ({pictures} : { pictures : {fileName : string, id:
     
 
     return <div className="container">
-        <img src={`${imageUrl}/${pictures[index].fileName}`} alt="profile picture"/>
+        {pictures.length !== 0?  <img src={`${imageUrl}/${pictures[index].fileName}`} alt="profile picture"/> : "erm no pictures!"}
 
         <div className="buttons">
             <a className="button" onClick={() => handleBackward()}></a>
@@ -32,7 +32,7 @@ export const ImageContainer = ({pictures} : { pictures : {fileName : string, id:
         {pictures.length > 1 ? 
             <div className="status">
                 <div className="dot-container">
-                    {pictures.map((item, i) => <span key={i} className={index === i ? "active-dot" : "dot" }></span>)}
+                    {pictures.map((item, i) => <span key={item.id} className={index === i ? "active-dot" : "dot" }></span>)}
                 </div>
             </div> : null
         }

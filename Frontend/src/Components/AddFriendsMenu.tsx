@@ -24,8 +24,10 @@ export const AddFriendsMenu = ({setOpenAddMenu, group} : {setOpenAddMenu : (menu
 
             const data = await response.json();
 
+            const union = [...new Set([...data, ...group.profileIds])]
+
             const results = await Promise.all(
-                data.map(async (id : string) => {
+                union.map(async (id : string) => {
                     const profile = await fetch(API_URL+ `/Profile/get-public-profile?userId=${id}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
@@ -41,6 +43,8 @@ export const AddFriendsMenu = ({setOpenAddMenu, group} : {setOpenAddMenu : (menu
             setFriends(results)
 
 
+
+
         } catch (err) {
             console.error('Failed to load message history:', err);
         } finally {
@@ -49,7 +53,7 @@ export const AddFriendsMenu = ({setOpenAddMenu, group} : {setOpenAddMenu : (menu
     }
 
     const handleAddToGroup = async (userId : string) => {
-        await fetch(API_URL+`/Profile/add-to-group?groupId=${group.id}&userToAddId=${userId}`, {
+        await fetch(API_URL+`/Profile/add-to-group?groupId=${group.id}&otherId=${userId}`, {
             method: 'POST',
             headers: {
                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`

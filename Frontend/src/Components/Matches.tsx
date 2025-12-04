@@ -54,11 +54,11 @@ const Matches = ({profile, handleNextProfile} : {profile : Profile, handleNextPr
         handleNextProfile();
     }
 
-    const pictures = [
-        {fileName: "src/assets/images/chris_tinder.png", id: 1, profileId: "1"},
-        {fileName: "src/assets/images/profile-picture.png", id: 1, profileId: "1"},
-        {fileName: "src/assets/images/IMG_2755.JPG", id: 1, profileId: "1"}
-    ]
+    // const pictures = [
+    //     {fileName: "src/assets/images/chris_tinder.png", id: 1, profileId: "1"},
+    //     {fileName: "src/assets/images/profile-picture.png", id: 1, profileId: "1"},
+    //     {fileName: "src/assets/images/IMG_2755.JPG", id: 1, profileId: "1"}
+    // ]
 
     return (
         <>  

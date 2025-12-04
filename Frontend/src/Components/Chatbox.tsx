@@ -63,7 +63,9 @@ function Chatbox({group} : {group: Group}): ReactElement {
     useEffect(() => {
 
         const handleReceiveMessage = (message : MessageDTO) => {
-            setMessages(prev => [...prev, message])
+            if (message.groupId == group.id){
+                setMessages(prev => [...prev, message])
+            }
         }
 
         signalRService.CreateEventListener("receivemessage", handleReceiveMessage)

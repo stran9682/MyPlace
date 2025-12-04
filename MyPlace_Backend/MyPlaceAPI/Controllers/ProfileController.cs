@@ -189,8 +189,7 @@ public class ProfileController : ControllerBase
         Profile? userProfile = await _userManager.Users
             .Include(profile => profile.Attributes) // need this for the elastic search query
             .Include(profile => profile.OutgoingMatchRequests)
-            .Include(profile => profile.IncomingMatchRequests
-                .Where(request => request.State == State.Pending))
+            .Include(profile => profile.IncomingMatchRequests)
             .FirstOrDefaultAsync(identity => identity.Id == id);
 
         if (userProfile?.Attributes == null) return BadRequest();
@@ -200,17 +199,21 @@ public class ProfileController : ControllerBase
         List<string>? elasticSearchQuery = await _elasticService.GetSimilarAttributes(userProfile.Attributes);
         if (elasticSearchQuery is null) return BadRequest();
 
-        HashSet<string> recommendationsIds = elasticSearchQuery.ToHashSet(); // You'll get out of order recommendations,
-        // but damn it's fast!!
-        // Converting list to hashset is faster 
-        // than just creating a hashset also
+        HashSet<string> recommendationsIds = elasticSearchQuery.ToHashSet();// You'll get out of order recommendations,
+                                                                            // but damn it's fast!!
+                                                                            // Converting list to hashset is faster 
+                                                                            // than just creating a hashset also
 
         // remove people you've sent a request to already
         recommendationsIds.ExceptWith(userProfile.OutgoingMatchRequests.Select(x => x.ReceiverId));
+        recommendationsIds.ExceptWith(userProfile.IncomingMatchRequests
+            .Where(request => request.State != State.Pending)
+            .Select(x => x.SenderId));
         recommendationsIds.Remove(userProfile.Id);
 
         // Get Ids of pending requesters
         var pendingRequests = userProfile.IncomingMatchRequests
+            .Where(request => request.State == State.Pending)
             .Select(request => request.SenderId);
 
         // add pending requests to recommendations
@@ -354,7 +357,7 @@ public class ProfileController : ControllerBase
         if (userId is null) return Unauthorized();
 
         var accepts = await _profileContext.Matches
-            .Where(match => match.ReceiverId == userId || match.SenderId == userId
+            .Where(match => (match.ReceiverId == userId || match.SenderId == userId)
                 && match.State == State.Accepted)
             .Select(match => userId == match.ReceiverId ? match.SenderId : match.ReceiverId)
             .ToListAsync();
@@ -479,7 +482,7 @@ public class ProfileController : ControllerBase
 
     [Authorize]
     [HttpPost("add-to-group")]
-    public async Task<IActionResult> AddToGroup(int groupId, string userToAddId)
+    public async Task<IActionResult> AddToGroup(int groupId, string otherId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
@@ -493,40 +496,18 @@ public class ProfileController : ControllerBase
         
         if (group is null) return Unauthorized();
         
-        Profile? userToAdd = _userManager.Users.FirstOrDefault(u => 
-            u.Id == userToAddId &&
-            
-            // The person you are trying to add is actually a person you've matched with. NO WEIRDOS!
-            (
-                u.IncomingMatchRequests.Any(mr => mr.SenderId == userId && mr.State == State.Accepted) ||
-                u.OutgoingMatchRequests.Any(mr => mr.ReceiverId == userId && mr.State == State.Accepted)
-            )
-        );
+        Profile? userToAdd = await _userManager.Users
+            .Where(user => user.Id == otherId)
+            .Where(user => 
+                user.OutgoingMatchRequests.Any(mr => mr.ReceiverId == userId && mr.State == State.Accepted) || 
+                user.IncomingMatchRequests.Any(mr => mr.SenderId == userId && mr.State == State.Accepted))
+            .FirstOrDefaultAsync();
         
         if (userToAdd is null) return Unauthorized();
         
         group.Profiles.Add(userToAdd);
         await _profileContext.SaveChangesAsync();
-
-        GroupDTO dto = new GroupDTO
-        {
-            GroupName = group.GroupName,
-            ProfileIds = group.Profiles.Select(p => p.Id).ToList(),
-            Id = group.Id,
-            LastMessage = group.Messages
-                .OrderByDescending(m => m.Timestamp) // DAMN! all this just to get latest message...
-                // the work you make us do, better be grateful
-                .Select(m => new MessageDTO
-                {
-                    MessageText = m.MessageText,
-                    Timestamp = m.Timestamp,
-                    Username = m.Username,
-                    Id = m.ProfileId,
-                    GroupId = m.GroupId
-                })
-                .FirstOrDefault()
-        };
         
-        return Ok(dto);
+        return Ok();
     } 
 }
