@@ -27,6 +27,11 @@ spec:
         env:
         - name: ConnectionStrings__Redis
           value: redis:6379
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: connectionstring
 ---
 apiVersion: v1
 kind: Service

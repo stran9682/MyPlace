@@ -24,6 +24,11 @@ export const Matchespage = () => {
 
     const handleNextProfile = () => {
 
+        if (profileQueue.length < 3) {
+            setProfileQueue(prev => [...prev.slice(1)])
+            return;
+        }
+
         const getProfile = async (id:string) => {
             const profile = await fetch(header + `/Profile/get-public-profile?userId=${id}`, {
                 headers: {
@@ -70,7 +75,7 @@ export const Matchespage = () => {
     return (
         <div className="matches-page">
             {ids.length != 0 ? 
-                index <= ids.length && profileQueue[0] != undefined? 
+                profileQueue[0] != undefined? 
                     <Matches profile={profileQueue[0]} handleNextProfile={handleNextProfile}/> 
                 :
                     <h1>We low-key ran out of profiles for you, maybe try again a little later?</h1>
